@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "VibeFlow",
+    "slug": "vibeflow",
+    "scheme": "vibeflow",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "platforms": [
+      "android",
+      "web"
+    ],
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png",
+        "backgroundColor": "#0a0a0a"
+      },
+      "package": "com.vibeflow.app",
+      "permissions": [
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
+    },
+    "experiments": {
+      "typedRoutes": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-dev-client",
+      "expo-image",
+      "expo-sqlite",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 26,
+            "buildToolsVersion": "35.0.0",
+            "kotlinVersion": "2.1.20"
+          }
+        }
+      ],
+      "expo-splash-screen",
+      "expo-sharing"
+    ]
+  }
+}
