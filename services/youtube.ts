@@ -1,4 +1,5 @@
 import { Innertube } from 'youtubei.js';
+import { restGetStreamSource } from './youtubeRest';
 
 let client: Innertube | null = null;
 
@@ -140,20 +141,25 @@ export interface StreamSource {
 }
 
 export async function getStreamSource(videoId: string): Promise<StreamSource> {
-  const yt = await getClient();
-  for (const c of CLIENT_CASCADE) {
-    try {
-      const source = await tryResolve(yt, videoId, c);
-      if (source) {
-        console.log('[youtube] stream resolved via', c, 'for', videoId);
-        return source;
+  try {
+    const yt = await getClient();
+    for (const c of CLIENT_CASCADE) {
+      try {
+        const source = await tryResolve(yt, videoId, c);
+        if (source) {
+          console.log('[youtube] stream resolved via', c, 'for', videoId);
+          return source;
+        }
+      } catch (e) {
+        console.log('[youtube] client', c, 'failed:', (e as Error).message);
       }
-    } catch (e) {
-      console.log('[youtube] client', c, 'failed:', (e as Error).message);
     }
+  } catch (e) {
+    console.warn('[youtube] primary pipeline failed:', (e as Error).message);
   }
 
-  throw new Error(`No playable audio stream found for ${videoId}`);
+  console.warn('[youtube] cascade exhausted, trying REST fallback');
+  return restGetStreamSource(videoId);
 }
 
 // Back-compat shim — old callers expect just the URL.
@@ -163,28 +169,32 @@ export async function getStreamUrl(videoId: string): Promise<string> {
 
 /** Get a URL suitable for downloading a video's audio */
 export async function getDownloadUrl(videoId: string): Promise<StreamSource> {
-  const yt = await getClient();
-  // Try progressive formats first — self-contained files with stable URLs.
-  // Pick the smallest (lowest bitrate) since it contains both audio + video;
-  // we only keep the audio, so smaller = faster with no quality loss.
   try {
-    const info = await yt.getBasicInfo(videoId, { client: 'ANDROID_VR' });
-    const progressive = (info.streaming_data?.formats ?? [])
-      .filter((f: any) => f.has_audio)
-      .sort((a: any, b: any) => (a.bitrate ?? 0) - (b.bitrate ?? 0));
+    const yt = await getClient();
+    // Try progressive formats first — self-contained files with stable URLs.
+    // Pick the smallest (lowest bitrate) since it contains both audio + video;
+    // we only keep the audio, so smaller = faster with no quality loss.
+    try {
+      const info = await yt.getBasicInfo(videoId, { client: 'ANDROID_VR' });
+      const progressive = (info.streaming_data?.formats ?? [])
+        .filter((f: any) => f.has_audio)
+        .sort((a: any, b: any) => (a.bitrate ?? 0) - (b.bitrate ?? 0));
 
-    for (const f of progressive) {
-      const url: string | undefined = f.url;
-      if (url) {
-        console.log('[youtube] download progressive, mime:', f.mime_type, 'bitrate:', f.bitrate);
-        return { url, type: 'default', headers: { ...CLIENT_HEADERS.ANDROID_VR, Accept: '*/*' } };
+      for (const f of progressive) {
+        const url: string | undefined = f.url;
+        if (url) {
+          console.log('[youtube] download progressive, mime:', f.mime_type, 'bitrate:', f.bitrate);
+          return { url, type: 'default', headers: { ...CLIENT_HEADERS.ANDROID_VR, Accept: '*/*' } };
+        }
       }
+    } catch (e) {
+      console.log('[youtube] progressive download failed, falling back to adaptive:', (e as Error).message);
     }
   } catch (e) {
-    console.log('[youtube] progressive download failed, falling back to adaptive:', (e as Error).message);
+    console.warn('[youtube] youtubei.js init failed for download:', (e as Error).message);
   }
 
-  // Fallback: adaptive audio-only from the client cascade
+  // Fallback: adaptive audio via cascade → REST
   return getStreamSource(videoId);
 }
 
