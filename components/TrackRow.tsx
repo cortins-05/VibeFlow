@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { Heart, MoreVertical, Pause } from 'lucide-react-native';
 import { MotiView } from 'moti';
 import type { VideoInfo } from '../services/youtube';
+import { COLORS, FONTS } from '../constants/theme';
 
 interface Props {
   track: VideoInfo;
@@ -51,18 +52,18 @@ const TrackRow = memo(function TrackRow({
         style={
           isActive
             ? {
-                backgroundColor: 'rgba(255,92,46,0.06)',
+                backgroundColor: 'rgba(229,255,58,0.05)',
                 borderLeftWidth: 2,
-                borderLeftColor: '#ff5c2e',
+                borderLeftColor: COLORS.accent,
               }
             : { borderLeftWidth: 2, borderLeftColor: 'transparent' }
         }
       >
         <Text
           style={{
-            fontFamily: 'JetBrainsMono_400Regular',
+            fontFamily: FONTS.mono,
             fontSize: 11,
-            color: isActive ? '#ff5c2e' : '#5a4d42',
+            color: isActive ? COLORS.accent : COLORS.textFaint,
             width: 22,
           }}
         >
@@ -75,17 +76,17 @@ const TrackRow = memo(function TrackRow({
             style={{
               width: 50,
               height: 50,
-              borderRadius: 6,
-              backgroundColor: '#15110e',
+              borderRadius: 4,
+              backgroundColor: COLORS.surface,
             }}
             contentFit="cover"
           />
           {isActive && (
             <View
-              className="absolute inset-0 rounded-md items-center justify-center"
-              style={{ backgroundColor: 'rgba(10,9,7,0.55)' }}
+              className="absolute inset-0 items-center justify-center"
+              style={{ backgroundColor: 'rgba(11,12,11,0.6)', borderRadius: 4 }}
             >
-              <Pause color="#ff5c2e" size={16} fill="#ff5c2e" />
+              <Pause color={COLORS.accent} size={16} fill={COLORS.accent} />
             </View>
           )}
         </View>
@@ -93,10 +94,10 @@ const TrackRow = memo(function TrackRow({
         <View className="flex-1 ml-3 min-w-0">
           <Text
             style={{
-              fontFamily: 'Manrope_500Medium',
-              fontSize: 18,
-              lineHeight: 22,
-              color: '#f5efe3',
+              fontFamily: FONTS.sans,
+              fontSize: 17,
+              lineHeight: 21,
+              color: COLORS.text,
             }}
             numberOfLines={1}
           >
@@ -104,10 +105,10 @@ const TrackRow = memo(function TrackRow({
           </Text>
           <Text
             style={{
-              fontFamily: 'Manrope_500Medium',
+              fontFamily: FONTS.mono,
               fontSize: 11,
               letterSpacing: 0.4,
-              color: '#a08a78',
+              color: COLORS.textDim,
               marginTop: 2,
             }}
             numberOfLines={1}
@@ -118,9 +119,9 @@ const TrackRow = memo(function TrackRow({
 
         <Text
           style={{
-            fontFamily: 'JetBrainsMono_400Regular',
+            fontFamily: FONTS.mono,
             fontSize: 11,
-            color: '#5a4d42',
+            color: COLORS.textFaint,
             marginLeft: 8,
           }}
         >
@@ -137,8 +138,8 @@ const TrackRow = memo(function TrackRow({
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Heart
-              color={isFavorited ? '#ff5c2e' : '#5a4d42'}
-              fill={isFavorited ? '#ff5c2e' : 'transparent'}
+              color={isFavorited ? COLORS.secondary : COLORS.textFaint}
+              fill={isFavorited ? COLORS.secondary : 'transparent'}
               size={16}
               strokeWidth={isFavorited ? 2 : 1.8}
             />
@@ -151,7 +152,7 @@ const TrackRow = memo(function TrackRow({
             className="w-8 h-8 items-center justify-center ml-1"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <MoreVertical color="#5a4d42" size={16} />
+            <MoreVertical color={COLORS.textFaint} size={16} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
