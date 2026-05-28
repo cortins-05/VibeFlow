@@ -118,25 +118,7 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
   }
 
   if (state === 'done') {
-    return (
-      <TouchableOpacity
-        onPress={onDismiss}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 12,
-          paddingVertical: 7,
-          borderRadius: 4,
-          borderWidth: 1,
-          borderColor: 'rgba(61,245,224,0.3)',
-          marginLeft: 8,
-        }}
-      >
-        <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.secondary }}>
-          SAVED ✓
-        </Text>
-      </TouchableOpacity>
-    );
+    return null;
   }
 
   return (

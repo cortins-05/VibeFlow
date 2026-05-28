@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, Pressable, Modal, ScrollView, TextInput } from 'react-native';
-import { ListMusic } from 'lucide-react-native';
+import { ListMusic, Play } from 'lucide-react-native';
 import { useLibraryStore } from '../stores/libraryStore';
 import { usePlayerStore } from '../stores/playerStore';
 import { useDownloadStore } from '../stores/downloadStore';
@@ -15,7 +15,7 @@ interface Props {
 
 export default function TrackActionsModal({ visible, track, onClose }: Props) {
   const { playlists, createPlaylist, addTrackToPlaylist } = useLibraryStore();
-  const { addToQueue } = usePlayerStore();
+  const { addToQueue, addToQueueNext } = usePlayerStore();
   const { getLocalPath, isDownloaded } = useDownloadStore();
   const [showPlaylists, setShowPlaylists] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
@@ -26,6 +26,11 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
 
   function handleAddToQueue() {
     addToQueue(t);
+    onClose();
+  }
+
+  function handlePlayNext() {
+    addToQueueNext(t);
     onClose();
   }
 
@@ -82,9 +87,16 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
                 />
 
                 <ActionOption
-                  icon={<ListMusic color={COLORS.secondary} size={16} />}
-                  label="add to playlist"
+                  icon={<Play color={COLORS.secondary} size={16} />}
+                  label="play next"
                   color={COLORS.secondary}
+                  onPress={handlePlayNext}
+                />
+
+                <ActionOption
+                  icon={<ListMusic color={COLORS.textDim} size={16} />}
+                  label="add to playlist"
+                  color={COLORS.textDim}
                   onPress={() => setShowPlaylists(true)}
                 />
 

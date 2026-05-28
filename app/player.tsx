@@ -16,6 +16,7 @@ import ProgressScrub from '../components/player/ProgressScrub';
 import PlayerControls from '../components/player/PlayerControls';
 import SecondaryActions from '../components/player/SecondaryActions';
 import QueuePanel from '../components/player/QueuePanel';
+import TrackActionsModal from '../components/TrackActionsModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const ARTWORK_SIZE = SCREEN_WIDTH - 96;
@@ -31,6 +32,7 @@ export default function PlayerScreen() {
 
   const [showLyrics, setShowLyrics] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
+  const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
 
   const { downloadState, downloadProgress, setDownloadState, handleDownload, handlePauseDownload, handleResumeDownload } =
     useTrackDownload(currentTrack);
@@ -168,6 +170,7 @@ export default function PlayerScreen() {
             hasLyrics={!!lyrics}
             showLyrics={showLyrics}
             onToggleLyrics={toggleLyrics}
+            onAddToPlaylist={() => setActionTrack(currentTrack)}
             downloadProps={{
               state: downloadState,
               progress: downloadProgress,
@@ -179,6 +182,11 @@ export default function PlayerScreen() {
           />
         </View>
         <QueuePanel visible={showQueue} onClose={() => setShowQueue(false)} />
+        <TrackActionsModal
+          visible={!!actionTrack}
+          track={actionTrack}
+          onClose={() => setActionTrack(null)}
+        />
       </SafeAreaView>
     </View>
   );

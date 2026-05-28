@@ -32,6 +32,7 @@ interface PlayerStore {
   playTrack: (track: Track) => Promise<void>;
   playQueue: (tracks: Track[], startIndex?: number) => Promise<void>;
   addToQueue: (track: Track) => Promise<void>;
+  addToQueueNext: (track: Track) => Promise<void>;
   removeFromQueue: (index: number) => Promise<void>;
   clearQueue: () => Promise<void>;
   moveInQueue: (fromIndex: number, toIndex: number) => Promise<void>;
@@ -173,25 +174,55 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     }
   },
 
+  addToQueueNext: async (track) => {
+    const { queue, activeTrackIndex } = get();
+    if (activeTrackIndex < 0) {
+      await get().addToQueue(track);
+      return;
+    }
+    const insertIdx = activeTrackIndex + 1;
+    try {
+      const src = await resolveSource(track);
+      await TrackPlayer.add(toRntpTrack(track, src), 1);
+      const newQueue = [...queue.slice(0, insertIdx), track, ...queue.slice(insertIdx)];
+      set({ queue: newQueue });
+    } catch (e) {
+      console.error('[playerStore] addToQueueNext failed:', track.title, e);
+    }
+  },
+
   removeFromQueue: async (index) => {
     const { queue, activeTrackIndex } = get();
     if (index < 0 || index >= queue.length) return;
     const newQueue = queue.filter((_, i) => i !== index);
-    const newIndex = index < activeTrackIndex ? activeTrackIndex - 1
-      : index === activeTrackIndex ? Math.min(activeTrackIndex, newQueue.length - 1)
-      : activeTrackIndex;
-    set({ queue: newQueue, activeTrackIndex: newIndex });
-    await TrackPlayer.reset();
-    for (const t of newQueue) {
-      try {
-        const src = await resolveSource(t);
-        await TrackPlayer.add(toRntpTrack(t, src));
-      } catch (e) {
-        console.warn('[playerStore] skipping unresolvable track:', t.title);
+
+    if (index === activeTrackIndex) {
+      if (newQueue.length === 0) {
+        await TrackPlayer.reset();
+        set({ queue: [], activeTrackIndex: -1, currentTrack: null, isPlaying: false });
+        return;
       }
-    }
-    if (newQueue.length > 0) {
-      await TrackPlayer.skip(newIndex);
+      const newIndex = Math.min(index, newQueue.length - 1);
+      const nextTrack = newQueue[newIndex];
+      try {
+        const src = await resolveSource(nextTrack);
+        await TrackPlayer.reset();
+        await TrackPlayer.add(toRntpTrack(nextTrack, src));
+        await TrackPlayer.play();
+        set({ queue: newQueue, activeTrackIndex: newIndex, currentTrack: { ...nextTrack, url: src.url } });
+      } catch (e) {
+        console.error('[playerStore] play next after remove failed:', e);
+      }
+    } else {
+      const newIndex = index < activeTrackIndex ? activeTrackIndex - 1 : activeTrackIndex;
+      if (index > activeTrackIndex) {
+        try {
+          await TrackPlayer.remove(index - activeTrackIndex);
+        } catch (e) {
+          console.warn('[playerStore] RNTP remove failed:', e);
+        }
+      }
+      set({ queue: newQueue, activeTrackIndex: newIndex });
     }
   },
 

@@ -9,6 +9,7 @@ export default function SecondaryActions(p: {
   hasLyrics: boolean;
   showLyrics: boolean;
   onToggleLyrics: () => void;
+  onAddToPlaylist: () => void;
   downloadProps: {
     state: DownloadState;
     progress: number | null;
@@ -24,6 +25,7 @@ export default function SecondaryActions(p: {
       {p.hasLyrics ? (
         <ConsoleButton label="lyrics" variant="accent" filled={p.showLyrics} onPress={p.onToggleLyrics} />
       ) : null}
+      <ConsoleButton label="playlist" variant="ghost" onPress={p.onAddToPlaylist} />
       <DownloadButton {...p.downloadProps} />
     </View>
   );
