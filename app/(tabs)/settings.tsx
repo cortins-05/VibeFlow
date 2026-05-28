@@ -59,10 +59,9 @@ export default function SettingsScreen() {
               transition={{ type: 'timing', duration: 500 }}
             >
               <Text
-                style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 11, letterSpacing: 1.4 }}
-                className="text-text-muted"
+                style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#a08a78' }}
               >
-                PREFERENCES · v1.0
+                Preferences
               </Text>
               <View className="flex-row items-end mt-2">
                 <Text
@@ -132,14 +131,13 @@ export default function SettingsScreen() {
                 </Text>
                 <Text
                   style={{
-                    fontFamily: 'JetBrainsMono_400Regular',
-                    fontSize: 10,
-                    letterSpacing: 1.2,
+                    fontFamily: 'Manrope_400Regular',
+                    fontSize: 12,
                     color: '#a08a78',
                     marginTop: 3,
                   }}
                 >
-                  {cacheSize} · MB IN USE
+                  {cacheSize} MB in use
                 </Text>
               </View>
               <TouchableOpacity
@@ -154,13 +152,12 @@ export default function SettingsScreen() {
               >
                 <Text
                   style={{
-                    fontFamily: 'JetBrainsMono_500Medium',
-                    fontSize: 10,
-                    letterSpacing: 1.4,
+                    fontFamily: 'Manrope_500Medium',
+                    fontSize: 12,
                     color: '#a08a78',
                   }}
                 >
-                  CLEAR
+                  Clear
                 </Text>
               </TouchableOpacity>
             </View>
@@ -183,7 +180,7 @@ export default function SettingsScreen() {
                 color: '#3a322c',
               }}
             >
-              made with care.
+              Made with care
             </Text>
           </View>
         </ScrollView>
@@ -207,12 +204,11 @@ function Section({
         />
         <Text
           style={{
-            fontFamily: 'JetBrainsMono_500Medium',
-            fontSize: 10,
-            letterSpacing: 1.8,
+            fontFamily: 'Manrope_500Medium',
+            fontSize: 13,
             marginLeft: 8,
+            color: '#a08a78',
           }}
-          className="text-text-secondary"
         >
           {title}
         </Text>
@@ -295,9 +291,8 @@ function Row({
       </View>
       <Text
         style={{
-          fontFamily: 'JetBrainsMono_500Medium',
-          fontSize: 10,
-          letterSpacing: 1.4,
+          fontFamily: 'Manrope_500Medium',
+          fontSize: 12,
           color: accent ? '#ff5c2e' : '#5a4d42',
         }}
       >

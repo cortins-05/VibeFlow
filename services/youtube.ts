@@ -161,6 +161,33 @@ export async function getStreamUrl(videoId: string): Promise<string> {
   return (await getStreamSource(videoId)).url;
 }
 
+/** Get a URL suitable for downloading a video's audio */
+export async function getDownloadUrl(videoId: string): Promise<StreamSource> {
+  const yt = await getClient();
+  // Try progressive formats first — self-contained files with stable URLs.
+  // Pick the smallest (lowest bitrate) since it contains both audio + video;
+  // we only keep the audio, so smaller = faster with no quality loss.
+  try {
+    const info = await yt.getBasicInfo(videoId, { client: 'ANDROID_VR' });
+    const progressive = (info.streaming_data?.formats ?? [])
+      .filter((f: any) => f.has_audio)
+      .sort((a: any, b: any) => (a.bitrate ?? 0) - (b.bitrate ?? 0));
+
+    for (const f of progressive) {
+      const url: string | undefined = f.url;
+      if (url) {
+        console.log('[youtube] download progressive, mime:', f.mime_type, 'bitrate:', f.bitrate);
+        return { url, type: 'default', headers: { ...CLIENT_HEADERS.ANDROID_VR, Accept: '*/*' } };
+      }
+    }
+  } catch (e) {
+    console.log('[youtube] progressive download failed, falling back to adaptive:', (e as Error).message);
+  }
+
+  // Fallback: adaptive audio-only from the client cascade
+  return getStreamSource(videoId);
+}
+
 function isHls(url: string): boolean {
   return /\.m3u8(\?|$)/.test(url);
 }
@@ -179,7 +206,7 @@ async function tryResolve(
   const formats = info.streaming_data?.adaptive_formats ?? [];
   const audioOnly = formats
     .filter((f: any) => f.has_audio && !f.has_video)
-    .sort((a: any, b: any) => (b.bitrate ?? 0) - (a.bitrate ?? 0));
+    .sort((a: any, b: any) => (a.bitrate ?? 0) - (b.bitrate ?? 0));
 
   console.log(
     '[youtube] tryResolve', videoId, 'client=', c,
@@ -189,25 +216,24 @@ async function tryResolve(
 
   if (audioOnly.length === 0) return null;
 
-  const best = audioOnly[0];
-  const url = best.decipher
-    ? await best.decipher(yt.session.player)
-    : best.url;
+  // Target Opus 96k — excellent quality-to-size ratio; prefers Opus codec
+  const MIN_BITRATE = 96_000;
+  const opusAudio = audioOnly.filter((f: any) => f.mime_type?.includes('opus'));
+  const best = (opusAudio.length > 0
+    ? (opusAudio.find((f: any) => (f.bitrate ?? 0) >= MIN_BITRATE) ?? opusAudio[opusAudio.length - 1])
+    : (audioOnly.find((f: any) => (f.bitrate ?? 0) >= MIN_BITRATE) ?? audioOnly[audioOnly.length - 1]));
+  // Prefer pre-deciphered URL to avoid needing a JS evaluator in RN
+  const url = best.url ?? (best.decipher ? await best.decipher(yt.session.player) : undefined);
 
   if (!url) return null;
 
-  // ANDROID_VR URLs play without any special headers.
-  // For other clients that need them, attach matching headers.
-  const needsHeaders = c !== 'ANDROID_VR';
-  const headers = needsHeaders
-    ? {
-        ...CLIENT_HEADERS[c],
-        Accept: '*/*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        Origin: 'https://www.youtube.com',
-        Referer: 'https://www.youtube.com/',
-      }
-    : undefined;
+  const headers = {
+    ...CLIENT_HEADERS[c],
+    Accept: '*/*',
+    'Accept-Language': 'en-US,en;q=0.9',
+    Origin: 'https://www.youtube.com',
+    Referer: 'https://www.youtube.com/',
+  };
 
   return {
     url,

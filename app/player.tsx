@@ -25,7 +25,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {
   Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Repeat1,
-  Heart, ChevronDown, ListMusic, Mic2, Download,
+  Heart, ChevronDown, ListMusic, Mic2,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import TrackPlayer, {
@@ -35,12 +35,13 @@ import TrackPlayer, {
   RepeatMode,
 } from 'react-native-track-player';
 import * as Haptics from 'expo-haptics';
-import { Paths, File as EfsFile } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 import { usePlayerStore } from '../stores/playerStore';
 import { useLibraryStore } from '../stores/libraryStore';
+import DownloadButton from '../components/DownloadButton';
+import { useDownloadStore } from '../stores/downloadStore';
 import { fetchLyrics, type LyricLine } from '../services/lyrics';
-import { getStreamSource } from '../services/youtube';
+import { getDownloadUrl } from '../services/youtube';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const ARTWORK_SIZE = SCREEN_WIDTH - 96;
@@ -63,6 +64,13 @@ export default function PlayerScreen() {
   const [showLyrics, setShowLyrics] = useState(false);
   const [lyrics, setLyrics] = useState<LyricLine[] | null>(null);
   const [activeLyricIdx, setActiveLyricIdx] = useState(0);
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
+  const [downloadState, setDownloadState] = useState<'idle' | 'downloading' | 'pausing' | 'paused' | 'done' | 'error'>(
+    currentTrack && useDownloadStore.getState().isDownloaded(currentTrack.videoId) ? 'done' : 'idle'
+  );
+  const downloadResumableRef = useRef<FileSystem.DownloadResumable | null>(null);
+  const downloadResumeDataRef = useRef<string | undefined>(undefined);
+  const downloadUrlRef = useRef<string | undefined>(undefined);
   const lyricsScrollRef = useRef<ScrollView>(null);
 
   const artworkScale = useSharedValue(1);
@@ -73,6 +81,16 @@ export default function PlayerScreen() {
     if (currentTrack) {
       fetchLyrics(currentTrack.title, currentTrack.artist, currentTrack.duration).then(setLyrics);
     }
+  }, [currentTrack?.videoId]);
+
+  useEffect(() => {
+    setDownloadState(
+      currentTrack && useDownloadStore.getState().isDownloaded(currentTrack.videoId) ? 'done' : 'idle'
+    );
+    setDownloadProgress(null);
+    downloadResumableRef.current = null;
+    downloadResumeDataRef.current = undefined;
+    downloadUrlRef.current = undefined;
   }, [currentTrack?.videoId]);
 
   useEffect(() => {
@@ -122,15 +140,20 @@ export default function PlayerScreen() {
 
   async function handleSkipNext() {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    TrackPlayer.skipToNext();
+    const { queue, activeTrackIndex } = usePlayerStore.getState();
+    const nextIdx = activeTrackIndex + 1;
+    if (nextIdx < queue.length) {
+      usePlayerStore.getState().playQueue(queue, nextIdx);
+    }
   }
 
   async function handleSkipPrev() {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const { queue, activeTrackIndex } = usePlayerStore.getState();
     if (progress.position > 3) {
-      TrackPlayer.seekTo(0);
-    } else {
-      TrackPlayer.skipToPrevious();
+      await TrackPlayer.seekTo(0);
+    } else if (activeTrackIndex > 0) {
+      usePlayerStore.getState().playQueue(queue, activeTrackIndex - 1);
     }
   }
 
@@ -154,24 +177,124 @@ export default function PlayerScreen() {
   async function handleDownload() {
     if (!currentTrack) return;
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log('[player] download starting for:', currentTrack.title);
+    setDownloadState('downloading');
+    setDownloadProgress(0);
+
     try {
-      const src = await getStreamSource(currentTrack.videoId);
-      console.log('[player] got stream url:', src.url?.slice(0, 80));
+      const src = await getDownloadUrl(currentTrack.videoId);
+      if (!src?.url) {
+        setDownloadState('error');
+        return;
+      }
+
+      downloadUrlRef.current = src.url;
+
+      const dir = `${FileSystem.documentDirectory}audio/`;
       const safeName = currentTrack.title.replace(/[/\\?%*:|"<>]/g, '_');
-      const dest = new EfsFile(Paths.cache, safeName + '.m4a');
-      const opts: import('expo-file-system').DownloadOptions = { idempotent: true };
-      if (src.headers) opts.headers = src.headers;
-      const file = await EfsFile.downloadFileAsync(src.url, dest, opts);
-      console.log('[player] download completed, file:', file?.uri);
-      if (file && (await Sharing.isAvailableAsync())) {
-        await Sharing.shareAsync(file.uri);
-        console.log('[player] share dialog opened');
+      // Use extension from content-type or default to .m4a
+      const ext = src.url.includes('.webm') ? '.webm' : '.m4a';
+      const destFile = dir + safeName + ext;
+
+      await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+
+      const callback: FileSystem.DownloadProgressCallback = (data) => {
+        if (data.totalBytesExpectedToWrite > 0) {
+          setDownloadProgress(data.totalBytesWritten / data.totalBytesExpectedToWrite);
+        }
+      };
+
+      const resumable = FileSystem.createDownloadResumable(
+        src.url,
+        destFile,
+        src.headers,
+        callback,
+        downloadResumeDataRef.current,
+      );
+      downloadResumableRef.current = resumable;
+
+      const result = await resumable.downloadAsync();
+
+      if (result?.uri) {
+        downloadResumableRef.current = null;
+        downloadResumeDataRef.current = undefined;
+        setDownloadState('done');
+        setDownloadProgress(1);
+        if (currentTrack) {
+          useDownloadStore.getState().registerDownload(currentTrack, result.uri);
+        }
       } else {
-        console.warn('[player] sharing not available or no file');
+        setDownloadState('error');
       }
     } catch (e) {
-      console.error('[player] download failed:', (e as Error).message);
+      const errMsg = (e as Error).message;
+      // Pause is intentional — don't show as error
+      if (errMsg?.includes('cancelled') || errMsg?.includes('pause')) {
+        return;
+      }
+      console.error('[player] download failed:', errMsg);
+      setDownloadState('error');
+    }
+  }
+
+  async function handlePauseDownload() {
+    const r = downloadResumableRef.current;
+    if (!r) return;
+    setDownloadState('pausing');
+    try {
+      const pauseState = await r.pauseAsync();
+      downloadResumeDataRef.current = pauseState.resumeData;
+      downloadResumableRef.current = null;
+      setDownloadState('paused');
+    } catch {
+      setDownloadState('error');
+    }
+  }
+
+  async function handleResumeDownload() {
+    if (!currentTrack || !downloadResumeDataRef.current) return;
+    setDownloadState('downloading');
+
+    try {
+      const dir = `${FileSystem.documentDirectory}audio/`;
+      const safeName = currentTrack.title.replace(/[/\\?%*:|"<>]/g, '_');
+      const ext = downloadUrlRef.current?.includes('.webm') ? '.webm' : '.m4a';
+      const destFile = dir + safeName + ext;
+
+      const callback: FileSystem.DownloadProgressCallback = (data) => {
+        if (data.totalBytesExpectedToWrite > 0) {
+          setDownloadProgress(data.totalBytesWritten / data.totalBytesExpectedToWrite);
+        }
+      };
+
+      const resumable = FileSystem.createDownloadResumable(
+        downloadUrlRef.current!,
+        destFile,
+        undefined,
+        callback,
+        downloadResumeDataRef.current,
+      );
+      downloadResumableRef.current = resumable;
+      downloadResumeDataRef.current = undefined;
+
+      const result = await resumable.downloadAsync();
+
+      if (result?.uri) {
+        downloadResumableRef.current = null;
+        setDownloadState('done');
+        setDownloadProgress(1);
+        if (currentTrack) {
+          useDownloadStore.getState().registerDownload(currentTrack, result.uri);
+        }
+      } else {
+        setDownloadState('error');
+      }
+    } catch (e) {
+      const errMsg = (e as Error).message;
+      if (errMsg?.includes('cancelled') || errMsg?.includes('pause')) {
+        return;
+      }
+      console.error('[player] download resume failed:', errMsg);
+      setDownloadState('error');
     }
   }
 
@@ -211,13 +334,12 @@ export default function PlayerScreen() {
           <View className="flex-1 items-center">
             <Text
               style={{
-                fontFamily: 'JetBrainsMono_500Medium',
-                fontSize: 10,
-                letterSpacing: 1.8,
+                fontFamily: 'Manrope_400Regular',
+                fontSize: 12,
                 color: '#a08a78',
               }}
             >
-              ON AIR · NOW PLAYING
+              Now playing
             </Text>
           </View>
           <TouchableOpacity
@@ -593,14 +715,13 @@ export default function PlayerScreen() {
               />
               <Text
                 style={{
-                  fontFamily: 'JetBrainsMono_500Medium',
-                  fontSize: 10,
-                  letterSpacing: 1.2,
+                  fontFamily: 'Manrope_500Medium',
+                  fontSize: 12,
                   color: fav ? '#ff5c2e' : '#a08a78',
                   marginLeft: 6,
                 }}
               >
-                {fav ? 'SAVED' : 'SAVE'}
+                {fav ? 'Saved' : 'Save'}
               </Text>
             </TouchableOpacity>
 
@@ -624,40 +745,25 @@ export default function PlayerScreen() {
                 />
                 <Text
                   style={{
-                    fontFamily: 'JetBrainsMono_500Medium',
-                    fontSize: 10,
-                    letterSpacing: 1.2,
+                    fontFamily: 'Manrope_500Medium',
+                    fontSize: 12,
                     color: showLyrics ? '#ff5c2e' : '#a08a78',
                     marginLeft: 6,
                   }}
                 >
-                  LYRICS
+                  Lyrics
                 </Text>
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity
-              onPress={handleDownload}
-              className="flex-row items-center px-4 py-2 rounded-full ml-2"
-              style={{
-                borderWidth: 1,
-                borderColor: 'rgba(245,239,227,0.08)',
-                backgroundColor: 'transparent',
-              }}
-            >
-              <Download color="#a08a78" size={14} />
-              <Text
-                style={{
-                  fontFamily: 'JetBrainsMono_500Medium',
-                  fontSize: 10,
-                  letterSpacing: 1.2,
-                  color: '#a08a78',
-                  marginLeft: 6,
-                }}
-              >
-                DOWNLOAD
-              </Text>
-            </TouchableOpacity>
+            <DownloadButton
+              state={downloadState}
+              progress={downloadProgress}
+              onDownload={handleDownload}
+              onPause={handlePauseDownload}
+              onResume={handleResumeDownload}
+              onDismiss={() => setDownloadState('idle')}
+            />
           </View>
         </View>
       </SafeAreaView>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,16 +9,22 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Plus, ListMusic, Heart, Clock, ChevronRight } from 'lucide-react-native';
+import { Plus, ListMusic, Heart, Clock, Download, ChevronRight } from 'lucide-react-native';
 import { MotiView } from 'moti';
 import { useRouter } from 'expo-router';
+import TrackRow from '../../components/TrackRow';
 import { useLibraryStore } from '../../stores/libraryStore';
+import { useDownloadStore } from '../../stores/downloadStore';
+import { usePlayerStore } from '../../stores/playerStore';
 
 export default function LibraryScreen() {
   const router = useRouter();
   const { playlists, createPlaylist, history, favorites } = useLibraryStore();
+  const { downloads, loadDownloads } = useDownloadStore();
   const [showCreate, setShowCreate] = useState(false);
   const [playlistName, setPlaylistName] = useState('');
+
+  useEffect(() => { loadDownloads(); }, []);
 
   function handleCreate() {
     if (!playlistName.trim()) return;
@@ -45,10 +51,13 @@ export default function LibraryScreen() {
               transition={{ type: 'timing', duration: 500 }}
             >
               <Text
-                style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 11, letterSpacing: 1.4 }}
-                className="text-text-muted"
+                style={{
+                  fontFamily: 'Manrope_400Regular',
+                  fontSize: 13,
+                  color: '#a08a78',
+                }}
               >
-                YOUR · COLLECTION
+                Your collection
               </Text>
               <View className="flex-row items-end mt-2">
                 <Text
@@ -101,6 +110,13 @@ export default function LibraryScreen() {
             />
             <View style={{ height: 10 }} />
             <PinnedCard
+              icon={<Download color="#34c759" size={22} />}
+              label="Downloads"
+              count={downloads.length}
+              onPress={() => router.push('/(tabs)/downloads' as any)}
+            />
+            <View style={{ height: 10 }} />
+            <PinnedCard
               icon={<Clock color="#a08a78" size={22} />}
               label="History"
               count={history.length}
@@ -108,37 +124,49 @@ export default function LibraryScreen() {
             />
           </View>
 
-          <View className="mt-8 px-6">
-            <View className="flex-row items-center mb-4">
-              <View
-                style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#ff5c2e' }}
-              />
-              <Text
-                style={{
-                  fontFamily: 'JetBrainsMono_500Medium',
-                  fontSize: 10,
-                  letterSpacing: 1.8,
-                  marginLeft: 8,
-                }}
-                className="text-text-secondary"
-              >
-                PLAYLISTS
-              </Text>
-              <View
-                style={{
-                  flex: 1,
-                  height: 1,
-                  backgroundColor: 'rgba(245,239,227,0.06)',
-                  marginLeft: 10,
-                }}
-              />
-              <Text
-                style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, marginLeft: 10 }}
-                className="text-text-muted"
-              >
-                {String(playlists.length).padStart(2, '0')}
-              </Text>
+          {downloads.length > 0 && (
+            <View className="mt-8 px-6">
+              <SectionHeader text="Recent Downloads" count={downloads.length} />
+              {downloads.slice(-5).reverse().map((d, i) => {
+                const track = {
+                  id: d.video_id,
+                  videoId: d.video_id,
+                  title: d.title,
+                  artist: d.artist,
+                  artwork: d.artwork,
+                  duration: d.duration,
+                };
+                return (
+                  <TrackRow
+                    key={d.video_id}
+                    track={track}
+                    index={i}
+                    onPress={() => usePlayerStore.getState().playTrack(track)}
+                  />
+                );
+              })}
+              {downloads.length > 5 && (
+                <TouchableOpacity
+                  onPress={() => router.push('/(tabs)/downloads' as any)}
+                  className="py-3 items-center"
+                >
+                  <Text
+                    style={{
+                      fontFamily: 'JetBrainsMono_400Regular',
+                      fontSize: 10,
+                      letterSpacing: 1.4,
+                      color: '#a08a78',
+                    }}
+                  >
+                    SHOW ALL ({downloads.length})
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
+          )}
+
+          <View className="mt-8 px-6">
+            <SectionHeader text="Playlists" count={playlists.length} />
 
             {playlists.length === 0 && (
               <View className="items-center py-10">
@@ -162,7 +190,7 @@ export default function LibraryScreen() {
                   }}
                   className="text-text-muted"
                 >
-                  TAP + TO START COLLECTING
+                  Tap + to start collecting
                 </Text>
               </View>
             )}
@@ -351,6 +379,44 @@ export default function LibraryScreen() {
   );
 }
 
+function SectionHeader({ text, count }: { text: string; count: number }) {
+  return (
+    <View className="flex-row items-center mb-3">
+      <View
+        style={{ width: 4, height: 16, borderRadius: 2, backgroundColor: '#ff5c2e' }}
+      />
+      <Text
+        style={{
+          fontFamily: 'Manrope_500Medium',
+          fontSize: 15,
+          marginLeft: 10,
+          color: '#f5efe3',
+        }}
+      >
+        {text}
+      </Text>
+      <Text
+        style={{
+          fontFamily: 'Manrope_400Regular',
+          fontSize: 12,
+          marginLeft: 6,
+          color: '#5a4d42',
+        }}
+      >
+        {String(count).padStart(2, '0')}
+      </Text>
+      <View
+        style={{
+          flex: 1,
+          height: 1,
+          backgroundColor: 'rgba(245,239,227,0.06)',
+          marginLeft: 10,
+        }}
+      />
+    </View>
+  );
+}
+
 function PinnedCard({
   icon,
   label,
@@ -402,17 +468,16 @@ function PinnedCard({
         >
           {label}
         </Text>
-        <Text
-          style={{
-            fontFamily: 'JetBrainsMono_400Regular',
-            fontSize: 10,
-            letterSpacing: 1.2,
-            color: '#a08a78',
-            marginTop: 4,
-          }}
-        >
-          {String(count).padStart(2, '0')} · TRACKS
-        </Text>
+      <Text
+        style={{
+          fontFamily: 'Manrope_400Regular',
+          fontSize: 11,
+          color: '#a08a78',
+          marginTop: 4,
+        }}
+      >
+        {count} tracks
+      </Text>
       </View>
       <ChevronRight color="#5a4d42" size={18} />
     </TouchableOpacity>

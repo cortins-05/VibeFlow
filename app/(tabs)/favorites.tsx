@@ -28,9 +28,9 @@ export default function FavoritesScreen() {
             <ChevronLeft color="#f5efe3" size={24} />
           </TouchableOpacity>
           <Text
-            style={{ fontFamily: 'JetBrainsMono_500Medium', fontSize: 10, letterSpacing: 1.8, color: '#a08a78' }}
+            style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#a08a78' }}
           >
-            FAVORITES
+            Favorites
           </Text>
         </View>
 
@@ -56,9 +56,9 @@ export default function FavoritesScreen() {
               </View>
             </MotiView>
             <Text
-              style={{ fontFamily: 'JetBrainsMono_500Medium', fontSize: 10, letterSpacing: 1.8, color: '#a08a78', marginTop: 20 }}
+              style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#a08a78', marginTop: 20 }}
             >
-              SAVED TRACKS
+              Your favorites
             </Text>
             <Text
               style={{ fontFamily: 'Manrope_500Medium', fontSize: 32, lineHeight: 36, color: '#f5efe3', marginTop: 6, textAlign: 'center' }}
@@ -66,9 +66,9 @@ export default function FavoritesScreen() {
               Favorites
             </Text>
             <Text
-              style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 1.2, color: '#5a4d42', marginTop: 6 }}
+              style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#5a4d42', marginTop: 6 }}
             >
-              {String(favoriteTracks.length).padStart(2, '0')} · TRACKS
+              {favoriteTracks.length} tracks
             </Text>
           </View>
 
@@ -77,8 +77,8 @@ export default function FavoritesScreen() {
               <Text style={{ fontFamily: 'Manrope_300Light', fontSize: 20, color: '#a08a78' }}>
                 No favorites yet.
               </Text>
-              <Text style={{ fontFamily: 'JetBrainsMono_400Regular', fontSize: 10, letterSpacing: 1.4, color: '#5a4d42', marginTop: 8 }}>
-                TAP THE HEART ICON TO SAVE
+              <Text style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#5a4d42', marginTop: 8 }}>
+                Tap the heart icon to save
               </Text>
             </View>
           )}

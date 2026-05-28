@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
@@ -12,7 +12,7 @@ import { Play, Pause, SkipForward } from 'lucide-react-native';
 import TrackPlayer, { usePlaybackState, useProgress, State } from 'react-native-track-player';
 import { usePlayerStore } from '../stores/playerStore';
 
-export default function MiniPlayer() {
+const MiniPlayer = memo(function MiniPlayer() {
   const router = useRouter();
   const { currentTrack, isPlayerVisible } = usePlayerStore();
   const playbackState = usePlaybackState();
@@ -126,4 +126,6 @@ export default function MiniPlayer() {
       </Pressable>
     </Animated.View>
   );
-}
+});
+
+export default MiniPlayer;

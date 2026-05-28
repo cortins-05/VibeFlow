@@ -4,9 +4,11 @@ import {
   getPlaylists,
   createPlaylist,
   deletePlaylist,
+  renamePlaylist,
   getPlaylistTracks,
   addTrackToPlaylist,
   removeTrackFromPlaylist,
+  swapTrackPositions,
   getHistory,
   type Playlist,
   type PlaylistTrack,
@@ -33,9 +35,11 @@ interface LibraryStore {
   loadLibrary: () => void;
   createPlaylist: (name: string, description?: string) => void;
   deletePlaylist: (id: string) => void;
+  renamePlaylist: (id: string, name: string) => void;
   getPlaylistTracks: (playlistId: string) => PlaylistTrack[];
   addTrackToPlaylist: (playlistId: string, track: Track) => void;
   removeTrackFromPlaylist: (itemId: string) => void;
+  moveTrackInPlaylist: (itemId: string, playlistId: string, direction: 'up' | 'down') => void;
   toggleFavorite: (videoId: string, track?: Omit<Track, 'id'>) => void;
   isFavorite: (videoId: string) => boolean;
 }
@@ -84,6 +88,13 @@ export const useLibraryStore = create<LibraryStore>((set, get) => ({
     set((s) => ({ playlists: s.playlists.filter((p) => p.id !== id) }));
   },
 
+  renamePlaylist: (id, name) => {
+    renamePlaylist(id, name);
+    set((s) => ({
+      playlists: s.playlists.map((p) => (p.id === id ? { ...p, name } : p)),
+    }));
+  },
+
   getPlaylistTracks: (playlistId) => getPlaylistTracks(playlistId),
 
   addTrackToPlaylist: (playlistId, track) => {
@@ -103,6 +114,15 @@ export const useLibraryStore = create<LibraryStore>((set, get) => ({
 
   removeTrackFromPlaylist: (itemId) => {
     removeTrackFromPlaylist(itemId);
+  },
+
+  moveTrackInPlaylist: (itemId, playlistId, direction) => {
+    const tracks = getPlaylistTracks(playlistId);
+    const idx = tracks.findIndex((t) => t.id === itemId);
+    if (idx === -1) return;
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= tracks.length) return;
+    swapTrackPositions(tracks[idx].id, tracks[swapIdx].id);
   },
 
   toggleFavorite: (videoId, track) => {

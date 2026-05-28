@@ -1,22 +1,22 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Clock, ChevronLeft } from 'lucide-react-native';
+import { Download, ChevronLeft, Trash2 } from 'lucide-react-native';
 import { MotiView } from 'moti';
 import { useRouter } from 'expo-router';
 import TrackRow from '../../components/TrackRow';
-import { useLibraryStore } from '../../stores/libraryStore';
+import { useDownloadStore } from '../../stores/downloadStore';
 import { usePlayerStore } from '../../stores/playerStore';
 
-export default function HistoryScreen() {
+export default function DownloadsScreen() {
   const router = useRouter();
-  const { history } = useLibraryStore();
+  const { downloads, deleteDownload } = useDownloadStore();
   const { playQueue, currentTrack } = usePlayerStore();
 
   return (
     <View className="flex-1 bg-[#0a0907]">
       <LinearGradient
-        colors={['rgba(255,92,46,0.12)', 'rgba(10,9,7,0)']}
+        colors={['rgba(52,199,89,0.12)', 'rgba(10,9,7,0)']}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 280 }}
       />
       <SafeAreaView className="flex-1" edges={['top']}>
@@ -30,7 +30,7 @@ export default function HistoryScreen() {
           <Text
             style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#a08a78' }}
           >
-            History
+            Downloads
           </Text>
         </View>
 
@@ -47,50 +47,76 @@ export default function HistoryScreen() {
               <View
                 style={{
                   width: 100, height: 100, borderRadius: 50,
-                  backgroundColor: 'rgba(210,170,140,0.10)',
+                  backgroundColor: 'rgba(52,199,89,0.10)',
                   alignItems: 'center', justifyContent: 'center',
-                  borderWidth: 1, borderColor: 'rgba(210,170,140,0.18)',
+                  borderWidth: 1, borderColor: 'rgba(52,199,89,0.18)',
                 }}
               >
-                <Clock color="#d2aa8c" size={36} />
+                <Download color="#34c759" size={36} />
               </View>
             </MotiView>
             <Text
               style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#a08a78', marginTop: 20 }}
             >
-              Listening history
+              Available offline
             </Text>
             <Text
               style={{ fontFamily: 'Manrope_500Medium', fontSize: 32, lineHeight: 36, color: '#f5efe3', marginTop: 6, textAlign: 'center' }}
             >
-              History
+              Downloads
             </Text>
             <Text
               style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#5a4d42', marginTop: 6 }}
             >
-              {history.length} tracks
+              {downloads.length} tracks
             </Text>
           </View>
 
-          {history.length === 0 && (
+          {downloads.length === 0 && (
             <View className="items-center py-10">
               <Text style={{ fontFamily: 'Manrope_300Light', fontSize: 20, color: '#a08a78' }}>
-                Nothing yet.
+                No downloads yet.
               </Text>
               <Text style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#5a4d42', marginTop: 8 }}>
-                Play a track to see it here
+                Download songs from the player
               </Text>
             </View>
           )}
 
-          {history.map((h, i) => (
-            <TrackRow
-              key={h.video_id + '_' + (h.id ?? i)}
-              track={{ videoId: h.video_id, title: h.title, artist: h.artist, artwork: h.artwork ?? undefined, duration: h.duration }}
-              index={i}
-              isActive={currentTrack?.videoId === h.video_id}
-              onPress={() => playQueue(history.map((entry) => ({ id: entry.video_id, videoId: entry.video_id, title: entry.title, artist: entry.artist, artwork: entry.artwork ?? undefined, duration: entry.duration })), i)}
-            />
+          {downloads.map((d, i) => (
+            <View key={d.video_id} className="flex-row items-center">
+              <View className="flex-1">
+                <TrackRow
+                  track={{
+                    videoId: d.video_id,
+                    title: d.title,
+                    artist: d.artist,
+                    artwork: d.artwork,
+                    duration: d.duration,
+                  }}
+                  index={i}
+                  isActive={currentTrack?.videoId === d.video_id}
+                  onPress={() => playQueue(
+                    downloads.map((dt) => ({
+                      id: dt.video_id,
+                      videoId: dt.video_id,
+                      title: dt.title,
+                      artist: dt.artist,
+                      artwork: dt.artwork,
+                      duration: dt.duration,
+                    })),
+                    i,
+                  )}
+                />
+              </View>
+              <TouchableOpacity
+                onPress={() => deleteDownload(d.video_id)}
+                className="pr-6 pl-2 py-4"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Trash2 color="#5a4d42" size={16} />
+              </TouchableOpacity>
+            </View>
           ))}
         </ScrollView>
       </SafeAreaView>

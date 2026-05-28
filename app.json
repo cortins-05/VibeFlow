@@ -7,6 +7,11 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0e0c0a"
+    },
     "platforms": [
       "android",
       "web"
@@ -16,12 +21,15 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png",
-        "backgroundColor": "#0a0a0a"
+        "backgroundColor": "#0a0907"
       },
       "package": "com.vibeflow.app",
       "permissions": [
         "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_AUDIO"
       ]
     },
     "experiments": {
@@ -45,7 +53,15 @@
         }
       ],
       "expo-splash-screen",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow VibeFlow to save audio files.",
+          "savePhotosPermission": "Allow VibeFlow to save audio files.",
+          "audioPermission": "Allow VibeFlow to access audio files."
+        }
+      ]
     ]
   }
 }

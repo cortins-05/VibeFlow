@@ -78,23 +78,13 @@ export default function SearchScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1 }}
         >
-          <View className="px-6 pt-2 pb-4">
+          <View className="px-6 pt-4 pb-4">
             <MotiView
               from={{ opacity: 0, translateY: -6 }}
               animate={{ opacity: 1, translateY: 0 }}
               transition={{ type: 'timing', duration: 500 }}
             >
-              <Text
-                style={{
-                  fontFamily: 'JetBrainsMono_400Regular',
-                  fontSize: 11,
-                  letterSpacing: 1.4,
-                }}
-                className="text-text-muted"
-              >
-                FIND ANYTHING · ANY VIBE
-              </Text>
-              <View className="flex-row items-end mt-2">
+              <View className="flex-row items-end">
                 <Text
                   style={{ fontFamily: 'Manrope_300Light', fontSize: 48, lineHeight: 52 }}
                   className="text-cream"
@@ -112,6 +102,16 @@ export default function SearchScreen() {
                   .
                 </Text>
               </View>
+              <Text
+                style={{
+                  fontFamily: 'Manrope_400Regular',
+                  fontSize: 14,
+                  color: '#a08a78',
+                  marginTop: 4,
+                }}
+              >
+                Find any song or vibe
+              </Text>
             </MotiView>
 
             <MotiView
@@ -168,25 +168,11 @@ export default function SearchScreen() {
           >
             {hasSearched && (
               <View className="mt-4">
-                <SectionLabel
-                  text={query.trim() ? `Results — "${query}"` : 'Results'}
-                  count={results.length}
-                />
+                <SectionHeader text={query.trim() ? `Results — "${query}"` : 'Results'} count={results.length} />
 
                 {isSearching && (
                   <View className="items-center py-12">
-                    <ActivityIndicator color="#ff5c2e" />
-                    <Text
-                      style={{
-                        fontFamily: 'JetBrainsMono_400Regular',
-                        fontSize: 10,
-                        letterSpacing: 1.6,
-                        marginTop: 12,
-                      }}
-                      className="text-text-muted"
-                    >
-                      TUNING IN…
-                    </Text>
+                    <ActivityIndicator color="#ff5c2e" size="small" />
                   </View>
                 )}
 
@@ -211,7 +197,7 @@ export default function SearchScreen() {
                     <Text
                       style={{
                         fontFamily: 'Manrope_300Light',
-                        fontSize: 22,
+                        fontSize: 20,
                         color: '#a08a78',
                       }}
                     >
@@ -219,14 +205,13 @@ export default function SearchScreen() {
                     </Text>
                     <Text
                       style={{
-                        fontFamily: 'JetBrainsMono_400Regular',
-                        fontSize: 10,
-                        letterSpacing: 1.4,
+                        fontFamily: 'Manrope_400Regular',
+                        fontSize: 12,
+                        color: '#5a4d42',
                         marginTop: 6,
                       }}
-                      className="text-text-muted"
                     >
-                      TRY A DIFFERENT VIBE
+                      Try a different search
                     </Text>
                   </View>
                 )}
@@ -234,36 +219,8 @@ export default function SearchScreen() {
             )}
 
             {!hasSearched && (
-              <View className="px-6 mt-8">
-                <View className="flex-row items-center mb-4">
-                  <View
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: 3,
-                      backgroundColor: '#ff5c2e',
-                    }}
-                  />
-                  <Text
-                    style={{
-                      fontFamily: 'JetBrainsMono_500Medium',
-                      fontSize: 10,
-                      letterSpacing: 1.8,
-                      marginLeft: 8,
-                    }}
-                    className="text-text-secondary"
-                  >
-                    TRY A VIBE
-                  </Text>
-                  <View
-                    style={{
-                      flex: 1,
-                      height: 1,
-                      backgroundColor: 'rgba(245,239,227,0.06)',
-                      marginLeft: 10,
-                    }}
-                  />
-                </View>
+              <View className="px-6 mt-6">
+                <SectionHeader text="Try a vibe" count={6} />
                 <View className="flex-row flex-wrap">
                   {['Chill', 'Focus', 'Hype', 'Late Night', 'Sunset Drive', 'Lo-fi'].map(
                     (mood) => (
@@ -311,22 +268,31 @@ export default function SearchScreen() {
   );
 }
 
-function SectionLabel({ text, count }: { text: string; count: number }) {
+function SectionHeader({ text, count }: { text: string; count: number }) {
   return (
-    <View className="flex-row items-center px-6 mb-3 mt-2">
+    <View className="flex-row items-center px-6 mb-3">
       <View
-        style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#ff5c2e' }}
+        style={{ width: 4, height: 16, borderRadius: 2, backgroundColor: '#ff5c2e' }}
       />
       <Text
         style={{
-          fontFamily: 'JetBrainsMono_500Medium',
-          fontSize: 10,
-          letterSpacing: 1.8,
-          marginLeft: 8,
+          fontFamily: 'Manrope_500Medium',
+          fontSize: 15,
+          marginLeft: 10,
+          color: '#f5efe3',
         }}
-        className="text-text-secondary"
       >
-        {text.toUpperCase()}
+        {text}
+      </Text>
+      <Text
+        style={{
+          fontFamily: 'Manrope_400Regular',
+          fontSize: 12,
+          marginLeft: 6,
+          color: '#5a4d42',
+        }}
+      >
+        {String(count).padStart(2, '0')}
       </Text>
       <View
         style={{
@@ -336,16 +302,6 @@ function SectionLabel({ text, count }: { text: string; count: number }) {
           marginLeft: 10,
         }}
       />
-      <Text
-        style={{
-          fontFamily: 'JetBrainsMono_400Regular',
-          fontSize: 10,
-          marginLeft: 10,
-        }}
-        className="text-text-muted"
-      >
-        {String(count).padStart(2, '0')}
-      </Text>
     </View>
   );
 }

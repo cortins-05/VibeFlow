@@ -55,14 +55,13 @@ function TabButton({
         />
         <Text
           style={{
-            fontFamily: 'Manrope_600SemiBold',
+            fontFamily: 'Manrope_500Medium',
             fontSize: 10,
-            letterSpacing: 0.8,
             color: focused ? '#f5efe3' : '#5a4d42',
             marginTop: 4,
           }}
         >
-          {label.toUpperCase()}
+          {label}
         </Text>
         <Animated.View
           style={[
@@ -127,6 +126,7 @@ export default function TabLayout() {
         <Tabs.Screen name="library" />
         <Tabs.Screen name="favorites" />
         <Tabs.Screen name="history" />
+        <Tabs.Screen name="downloads" />
         <Tabs.Screen name="settings" />
       </Tabs>
       <MiniPlayer />

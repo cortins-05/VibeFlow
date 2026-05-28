@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import TrackPlayer, { RepeatMode, TrackType } from 'react-native-track-player';
 import { getStreamSource, type StreamSource } from '../services/youtube';
 import { addToHistory } from '../services/db';
+import { useDownloadStore } from './downloadStore';
 
 export interface Track {
   id: string;
@@ -16,12 +17,14 @@ export interface Track {
 interface PlayerStore {
   currentTrack: Track | null;
   queue: Track[];
+  activeTrackIndex: number;
   isPlaying: boolean;
   shuffle: boolean;
   repeat: RepeatMode;
   isPlayerVisible: boolean;
   setCurrentTrack: (track: Track | null) => void;
   setQueue: (tracks: Track[]) => void;
+  setActiveTrackIndex: (index: number) => void;
   setIsPlaying: (v: boolean) => void;
   setShuffle: (v: boolean) => void;
   setRepeat: (mode: RepeatMode) => void;
@@ -57,9 +60,19 @@ function toRntpTrack(track: Track, src: StreamSource) {
   };
 }
 
+async function resolveSource(track: Track): Promise<StreamSource> {
+  const localPath = useDownloadStore.getState().getLocalPath(track.videoId);
+  if (localPath) {
+    console.log('[playerStore] playing from local file:', localPath);
+    return { url: localPath, type: 'default' };
+  }
+  return getStreamSource(track.videoId);
+}
+
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
   currentTrack: null,
   queue: [],
+  activeTrackIndex: -1,
   isPlaying: false,
   shuffle: false,
   repeat: RepeatMode.Off,
@@ -67,6 +80,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   setCurrentTrack: (track) => set({ currentTrack: track }),
   setQueue: (tracks) => set({ queue: tracks }),
+  setActiveTrackIndex: (index) => set({ activeTrackIndex: index }),
   setIsPlaying: (v) => set({ isPlaying: v }),
   setShuffle: (v) => set({ shuffle: v }),
   setRepeat: (mode) => set({ repeat: mode }),
@@ -75,7 +89,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   playTrack: async (track) => {
     console.log('[playerStore] playTrack:', track.title);
     try {
-      const src = await getStreamSource(track.videoId);
+      const src = await resolveSource(track);
       console.log('[playerStore] resolved url, starting playback');
       await TrackPlayer.reset();
       await TrackPlayer.add(toRntpTrack(track, src));
@@ -83,6 +97,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       set({
         currentTrack: { ...track, url: src.url },
         queue: [track],
+        activeTrackIndex: 0,
         isPlaying: true,
         isPlayerVisible: true,
       });
@@ -110,17 +125,17 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     set({
       queue: tracks,
       currentTrack: start,
+      activeTrackIndex: startIndex,
       isPlaying: true,
       isPlayerVisible: true,
     });
 
     try {
-      const src = await getStreamSource(start.videoId);
+      const src = await resolveSource(start);
       console.log('[playerStore] resolved start url, beginning playback');
       await TrackPlayer.reset();
       await TrackPlayer.add(toRntpTrack(start, src));
       await TrackPlayer.play();
-      // Update URL on resolved track
       set({ currentTrack: { ...start, url: src.url } });
       addToHistory({
         video_id: start.videoId,
@@ -134,11 +149,10 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       return;
     }
 
-    // Resolve remaining tracks in the background
     const rest = tracks.slice(startIndex + 1);
     for (const t of rest) {
       try {
-        const src = await getStreamSource(t.videoId);
+        const src = await resolveSource(t);
         await TrackPlayer.add(toRntpTrack(t, src));
       } catch (e) {
         console.warn('[playerStore] skipping unresolvable track:', t.title);
@@ -148,7 +162,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   addToQueue: async (track) => {
     try {
-      const src = await getStreamSource(track.videoId);
+      const src = await resolveSource(track);
       await TrackPlayer.add(toRntpTrack(track, src));
       set((state) => ({ queue: [...state.queue, track] }));
     } catch (e) {

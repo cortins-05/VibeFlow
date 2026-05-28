@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { View, Text, TouchableOpacity, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { Heart, MoreVertical, Pause } from 'lucide-react-native';
@@ -8,6 +9,7 @@ interface Props {
   track: VideoInfo;
   index?: number;
   onPress: () => void;
+  onLongPress?: () => void;
   onMore?: () => void;
   isActive?: boolean;
   showFavorite?: boolean;
@@ -21,10 +23,11 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export default function TrackRow({
+const TrackRow = memo(function TrackRow({
   track,
   index,
   onPress,
+  onLongPress,
   onMore,
   isActive,
   showFavorite,
@@ -41,6 +44,8 @@ export default function TrackRow({
     >
       <TouchableOpacity
         onPress={onPress}
+        onLongPress={onLongPress}
+        delayLongPress={400}
         activeOpacity={0.65}
         className="flex-row items-center px-6 py-2.5"
         style={
@@ -152,4 +157,6 @@ export default function TrackRow({
       </TouchableOpacity>
     </MotiView>
   );
-}
+});
+
+export default TrackRow;
