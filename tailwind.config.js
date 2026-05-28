@@ -1,7 +1,6 @@
 /** @type {import('tailwindcss').Config} */
-// Brutalist Newsprint palette.
-// Paper cream + ink black + ONE red accent + yellow highlight.
-// Sharp corners, no gradients, heavy rules. Anti-AI editorial.
+// Console / CMD palette.
+// Dark neutral-cool base + neon yellow accent + cyan secondary.
 module.exports = {
   content: [
     './app/**/*.{js,jsx,ts,tsx}',
@@ -11,75 +10,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Newsprint paper
-        paper: {
-          DEFAULT: '#f4efe2',
-          deep: '#ebe4d2',
-          dim: '#dcd3bd',
-        },
-        // Ink (text + rules + borders)
-        ink: {
-          DEFAULT: '#111110',
-          soft: '#2a2824',
-          mid: '#4a4640',
-          dim: '#6b675e',
-          faint: '#9a948a',
-        },
-        // ONE action color
-        red: {
-          DEFAULT: '#c4231a',
-          deep: '#8a1812',
-        },
-        // Editorial highlight
-        marker: '#f5d547',
-
-        // -- Aliases so legacy class names still resolve --
-        bg: {
-          primary: '#f4efe2',
-          surface: '#ebe4d2',
-          elevated: '#ebe4d2',
-          card: '#dcd3bd',
-        },
-        accent: {
-          DEFAULT: '#c4231a',
-          dim: '#8a1812',
-          glow: 'rgba(196,35,26,0.12)',
-        },
-        amber: {
-          DEFAULT: '#c4231a',
-          dim: '#8a1812',
-        },
-        cream: '#111110',
-        text: {
-          primary: '#111110',
-          secondary: '#4a4640',
-          muted: '#6b675e',
-          faint: '#9a948a',
-        },
-        surface: {
-          DEFAULT: 'rgba(17,17,16,0.04)',
-          hover: 'rgba(17,17,16,0.08)',
-          border: '#111110',
-          divider: '#111110',
-        },
+        bg: { DEFAULT: '#0b0c0b', surface: '#121413', elevated: '#1a1d1b' },
+        surface: { DEFAULT: '#121413', raised: '#1a1d1b' },
+        text: { DEFAULT: '#e6ebe3', dim: '#6f7a6c', faint: '#3a423a' },
+        accent: { DEFAULT: '#e5ff3a', glow: 'rgba(229,255,58,0.12)' },
+        secondary: { DEFAULT: '#3df5e0' },
+        error: '#ff4d4d',
+        // legacy aliases kept so any leftover class still resolves to the new theme
+        cream: '#e6ebe3',
+        amber: { DEFAULT: '#3df5e0', dim: '#2bbfae' },
       },
       fontFamily: {
-        // Serif editorial display
-        serif: ['Fraunces_700Bold'],
-        'serif-italic': ['Fraunces_700Bold_Italic'],
-        'serif-black': ['Fraunces_900Black'],
-        'serif-light': ['Fraunces_400Regular'],
-        // Mono captions / labels / numerals
         mono: ['JetBrainsMono_400Regular'],
         'mono-medium': ['JetBrainsMono_500Medium'],
-
-        // -- Aliases for legacy class names --
-        display: ['Fraunces_900Black'],
-        'display-thin': ['Fraunces_400Regular'],
-        sans: ['JetBrainsMono_400Regular'],
-        'sans-medium': ['JetBrainsMono_500Medium'],
-        'sans-semibold': ['Fraunces_700Bold'],
-        'sans-bold': ['Fraunces_900Black'],
+        sans: ['Manrope_400Regular'],
+        'sans-medium': ['Manrope_500Medium'],
+        display: ['Manrope_300Light'],
       },
     },
   },
