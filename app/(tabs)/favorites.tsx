@@ -2,7 +2,9 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import TrackRow from '../../components/TrackRow';
+import TrackActionsModal from '../../components/TrackActionsModal';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { usePlayerStore } from '../../stores/playerStore';
@@ -12,6 +14,7 @@ export default function FavoritesScreen() {
   const router = useRouter();
   const { favoriteTracks } = useLibraryStore();
   const { playQueue, currentTrack } = usePlayerStore();
+  const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
@@ -63,10 +66,19 @@ export default function FavoritesScreen() {
               track={{ videoId: t.videoId, title: t.title, artist: t.artist, artwork: t.artwork, duration: t.duration }}
               index={i}
               isActive={currentTrack?.videoId === t.videoId}
+              onLongPress={() =>
+                setActionTrack({ id: t.videoId, videoId: t.videoId, title: t.title, artist: t.artist, artwork: t.artwork, duration: t.duration })
+              }
               onPress={() => playQueue(favoriteTracks.map((ft) => ({ id: ft.videoId, ...ft })), i)}
             />
           ))}
         </ScrollView>
+
+        <TrackActionsModal
+          visible={!!actionTrack}
+          track={actionTrack}
+          onClose={() => setActionTrack(null)}
+        />
       </SafeAreaView>
     </View>
   );

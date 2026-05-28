@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshCon
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import TrackRow from '../../components/TrackRow';
-import AddToPlaylistModal from '../../components/AddToPlaylistModal';
+import TrackActionsModal from '../../components/TrackActionsModal';
 import ConsoleHeader from '../../components/ui/ConsoleHeader';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { getTrending, searchYouTube, type VideoInfo } from '../../services/youtube';
@@ -39,7 +39,7 @@ export default function HomeScreen() {
   const favorites = useLibraryStore((s) => s.favorites);
   const toggleFavorite = useLibraryStore((s) => s.toggleFavorite);
   const { currentTrack, playQueue } = usePlayerStore();
-  const [addToListTrack, setAddToListTrack] = useState<VideoInfo | null>(null);
+  const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
 
   const loadTrending = useCallback(async () => {
     try {
@@ -148,7 +148,8 @@ export default function HomeScreen() {
                     })
                   }
                   onLongPress={() =>
-                    setAddToListTrack({
+                    setActionTrack({
+                      id: h.video_id,
                       videoId: h.video_id,
                       title: h.title,
                       artist: h.artist,
@@ -231,7 +232,16 @@ export default function HomeScreen() {
                       duration: video.duration,
                     })
                   }
-                  onLongPress={() => setAddToListTrack(video)}
+                  onLongPress={() =>
+                    setActionTrack({
+                      id: video.videoId,
+                      videoId: video.videoId,
+                      title: video.title,
+                      artist: video.artist,
+                      artwork: video.artwork,
+                      duration: video.duration,
+                    })
+                  }
                   onPress={() => playQueue(trending.map(toTrack), i)}
                 />
               ))}
@@ -239,10 +249,10 @@ export default function HomeScreen() {
         </ScrollView>
       </SafeAreaView>
 
-      <AddToPlaylistModal
-        visible={!!addToListTrack}
-        track={addToListTrack ? { id: addToListTrack.videoId, ...addToListTrack } : null}
-        onClose={() => setAddToListTrack(null)}
+      <TrackActionsModal
+        visible={!!actionTrack}
+        track={actionTrack}
+        onClose={() => setActionTrack(null)}
       />
     </View>
   );

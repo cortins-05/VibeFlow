@@ -2,7 +2,9 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import TrackRow from '../../components/TrackRow';
+import TrackActionsModal from '../../components/TrackActionsModal';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { usePlayerStore } from '../../stores/playerStore';
@@ -12,6 +14,7 @@ export default function HistoryScreen() {
   const router = useRouter();
   const { history } = useLibraryStore();
   const { playQueue, currentTrack } = usePlayerStore();
+  const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
@@ -63,6 +66,9 @@ export default function HistoryScreen() {
               track={{ videoId: h.video_id, title: h.title, artist: h.artist, artwork: h.artwork ?? undefined, duration: h.duration }}
               index={i}
               isActive={currentTrack?.videoId === h.video_id}
+              onLongPress={() =>
+                setActionTrack({ id: h.video_id, videoId: h.video_id, title: h.title, artist: h.artist, artwork: h.artwork ?? undefined, duration: h.duration })
+              }
               onPress={() =>
                 playQueue(
                   history.map((entry) => ({
@@ -79,6 +85,12 @@ export default function HistoryScreen() {
             />
           ))}
         </ScrollView>
+
+        <TrackActionsModal
+          visible={!!actionTrack}
+          track={actionTrack}
+          onClose={() => setActionTrack(null)}
+        />
       </SafeAreaView>
     </View>
   );

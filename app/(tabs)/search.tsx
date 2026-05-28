@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { useLocalSearchParams } from 'expo-router';
 import TrackRow from '../../components/TrackRow';
+import TrackActionsModal from '../../components/TrackActionsModal';
 import ConsoleHeader from '../../components/ui/ConsoleHeader';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { searchYouTube, type VideoInfo } from '../../services/youtube';
@@ -43,6 +44,7 @@ export default function SearchScreen() {
   const { playQueue, currentTrack } = usePlayerStore();
   const favorites = useLibraryStore((s) => s.favorites);
   const toggleFavorite = useLibraryStore((s) => s.toggleFavorite);
+  const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
 
   const handleSearch = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -163,6 +165,16 @@ export default function SearchScreen() {
                           duration: video.duration,
                         })
                       }
+                      onLongPress={() =>
+                        setActionTrack({
+                          id: video.videoId,
+                          videoId: video.videoId,
+                          title: video.title,
+                          artist: video.artist,
+                          artwork: video.artwork,
+                          duration: video.duration,
+                        })
+                      }
                       onPress={() => playQueue(results.map(toTrack), i)}
                     />
                   ))}
@@ -213,6 +225,12 @@ export default function SearchScreen() {
             )}
           </ScrollView>
         </KeyboardAvoidingView>
+
+        <TrackActionsModal
+          visible={!!actionTrack}
+          track={actionTrack}
+          onClose={() => setActionTrack(null)}
+        />
       </SafeAreaView>
     </View>
   );

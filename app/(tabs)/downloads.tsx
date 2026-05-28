@@ -1,8 +1,10 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, Trash2, Share2 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import TrackRow from '../../components/TrackRow';
+import TrackActionsModal from '../../components/TrackActionsModal';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { useDownloadStore } from '../../stores/downloadStore';
 import { usePlayerStore } from '../../stores/playerStore';
@@ -12,6 +14,18 @@ export default function DownloadsScreen() {
   const router = useRouter();
   const { downloads, deleteDownload } = useDownloadStore();
   const { playQueue, currentTrack } = usePlayerStore();
+  const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
+
+  async function handleShare(filePath: string, title: string) {
+    try {
+      await Share.share({
+        url: filePath.startsWith('file://') ? filePath : `file://${filePath}`,
+        title,
+      });
+    } catch (e) {
+      console.warn('[downloads] share failed:', e);
+    }
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
@@ -70,6 +84,9 @@ export default function DownloadsScreen() {
                   }}
                   index={i}
                   isActive={currentTrack?.videoId === d.video_id}
+                  onLongPress={() =>
+                    setActionTrack({ id: d.video_id, videoId: d.video_id, title: d.title, artist: d.artist, artwork: d.artwork, duration: d.duration })
+                  }
                   onPress={() =>
                     playQueue(
                       downloads.map((dt) => ({
@@ -86,6 +103,13 @@ export default function DownloadsScreen() {
                 />
               </View>
               <TouchableOpacity
+                onPress={() => handleShare(d.file_path, d.title)}
+                style={{ paddingRight: 4, paddingLeft: 8, paddingVertical: 16 }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Share2 color={COLORS.secondary} size={16} />
+              </TouchableOpacity>
+              <TouchableOpacity
                 onPress={() => deleteDownload(d.video_id)}
                 style={{ paddingRight: 20, paddingLeft: 8, paddingVertical: 16 }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -95,6 +119,12 @@ export default function DownloadsScreen() {
             </View>
           ))}
         </ScrollView>
+
+        <TrackActionsModal
+          visible={!!actionTrack}
+          track={actionTrack}
+          onClose={() => setActionTrack(null)}
+        />
       </SafeAreaView>
     </View>
   );

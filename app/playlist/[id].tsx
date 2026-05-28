@@ -14,6 +14,7 @@ import { ChevronLeft, Play, Shuffle, Trash2, ListMusic, Edit3, ChevronUp, Chevro
 import { Image } from 'expo-image';
 import { MotiView } from 'moti';
 import TrackRow from '../../components/TrackRow';
+import TrackActionsModal from '../../components/TrackActionsModal';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { usePlayerStore } from '../../stores/playerStore';
@@ -39,6 +40,7 @@ export default function PlaylistScreen() {
 
   const playlist = playlists.find((p) => p.id === id);
   const [tracks, setTracks] = useState<PlaylistTrack[]>([]);
+  const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
   const [showRename, setShowRename] = useState(false);
   const [renameValue, setRenameValue] = useState('');
 
@@ -289,6 +291,16 @@ export default function PlaylistScreen() {
                   }}
                   index={i}
                   isActive={currentTrack?.videoId === t.video_id}
+                  onLongPress={() =>
+                    setActionTrack({
+                      id: t.video_id,
+                      videoId: t.video_id,
+                      title: t.title,
+                      artist: t.artist,
+                      artwork: t.artwork ?? undefined,
+                      duration: t.duration,
+                    })
+                  }
                   onPress={() => playQueue(tracks.map(toTrack), i)}
                   onMore={() => handleRemoveTrack(t)}
                 />
@@ -296,6 +308,12 @@ export default function PlaylistScreen() {
             </View>
           ))}
         </ScrollView>
+
+        <TrackActionsModal
+          visible={!!actionTrack}
+          track={actionTrack}
+          onClose={() => setActionTrack(null)}
+        />
       </SafeAreaView>
 
       {/* Rename modal */}

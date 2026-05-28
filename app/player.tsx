@@ -16,6 +16,7 @@ import LyricsView from '../components/player/LyricsView';
 import ProgressScrub from '../components/player/ProgressScrub';
 import PlayerControls from '../components/player/PlayerControls';
 import SecondaryActions from '../components/player/SecondaryActions';
+import QueuePanel from '../components/player/QueuePanel';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const ARTWORK_SIZE = SCREEN_WIDTH - 96;
@@ -31,6 +32,7 @@ export default function PlayerScreen() {
 
   const [showLyrics, setShowLyrics] = useState(false);
   const [visualizerMode, setVisualizerMode] = useState(false);
+  const [showQueue, setShowQueue] = useState(false);
 
   const { downloadState, downloadProgress, setDownloadState, handleDownload, handlePauseDownload, handleResumeDownload } =
     useTrackDownload(currentTrack);
@@ -119,8 +121,8 @@ export default function PlayerScreen() {
               <Text style={{ color: COLORS.accent }}>$</Text> now_playing
             </Text>
           </View>
-          <Pressable style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
-            <ListMusic color={COLORS.textDim} size={20} />
+          <Pressable onPress={() => setShowQueue(true)} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+            <ListMusic color={COLORS.text} size={20} />
           </Pressable>
         </View>
 
@@ -188,6 +190,7 @@ export default function PlayerScreen() {
             }}
           />
         </View>
+        <QueuePanel visible={showQueue} onClose={() => setShowQueue(false)} />
       </SafeAreaView>
     </View>
   );

@@ -16,7 +16,6 @@ import ConsoleHeader from '../../components/ui/ConsoleHeader';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { useDownloadStore } from '../../stores/downloadStore';
-import { usePlayerStore } from '../../stores/playerStore';
 import { COLORS, FONTS, glow } from '../../constants/theme';
 
 export default function LibraryScreen() {
@@ -89,41 +88,6 @@ export default function LibraryScreen() {
               onPress={() => router.push('/(tabs)/history' as any)}
             />
           </View>
-
-          {/* Recent downloads preview */}
-          {downloads.length > 0 && (
-            <View style={{ marginTop: 20 }}>
-              <SectionHeader label="Recent Downloads" count={downloads.length} />
-              {downloads.slice(-5).reverse().map((d, i) => {
-                const track = {
-                  id: d.video_id,
-                  videoId: d.video_id,
-                  title: d.title,
-                  artist: d.artist,
-                  artwork: d.artwork,
-                  duration: d.duration,
-                };
-                return (
-                  <TrackRow
-                    key={d.video_id}
-                    track={track}
-                    index={i}
-                    onPress={() => usePlayerStore.getState().playTrack(track)}
-                  />
-                );
-              })}
-              {downloads.length > 5 && (
-                <TouchableOpacity
-                  onPress={() => router.push('/(tabs)/downloads' as any)}
-                  style={{ paddingVertical: 12, alignItems: 'center' }}
-                >
-                  <Text style={{ fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1.4, color: COLORS.textDim }}>
-                    SHOW ALL ({downloads.length}) →
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
 
           {/* Playlists */}
           <View style={{ marginTop: 20 }}>
