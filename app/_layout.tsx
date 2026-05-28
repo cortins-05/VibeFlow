@@ -30,6 +30,15 @@ import {
   Manrope_500Medium,
   Manrope_600SemiBold,
 } from '@expo-google-fonts/manrope';
+import {
+  Inter_300Light,
+  Inter_400Regular,
+  Inter_500Medium,
+} from '@expo-google-fonts/inter';
+import {
+  IBMPlexMono_400Regular,
+  IBMPlexMono_500Medium,
+} from '@expo-google-fonts/ibm-plex-mono';
 
 SplashScreen.preventAutoHideAsync();
 TrackPlayer.registerPlaybackService(() => PlaybackService);
@@ -48,6 +57,11 @@ export default function RootLayout() {
     Manrope_400Regular,
     Manrope_500Medium,
     Manrope_600SemiBold,
+    Inter_300Light,
+    Inter_400Regular,
+    Inter_500Medium,
+    IBMPlexMono_400Regular,
+    IBMPlexMono_500Medium,
   });
 
   useEffect(() => {
