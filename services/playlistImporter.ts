@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { parseCSV } from './csvParser';
 import { parseJSON } from './jsonParser';
 import { parseTXT } from './txtParser';

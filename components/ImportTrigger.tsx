@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { TouchableOpacity, Text } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Upload } from 'lucide-react-native';
 import { useTheme, glow } from '../constants/theme';
 import ImportReviewModal from './ImportReviewModal';
@@ -23,10 +24,16 @@ export default function ImportTrigger({ compact }: Props) {
       });
       if (result.canceled || !result.assets?.[0]) return;
 
-      const uri = result.assets[0].uri;
-      const name = uri.split('/').pop()?.replace(/\.[^.]+$/, '') || 'Imported Playlist';
+      const pickedUri = result.assets[0].uri;
+      const name = pickedUri.split('/').pop()?.replace(/\.[^.]+$/, '') || 'Imported Playlist';
 
-      setImportUri(uri);
+      // Copy immediately to bypass Android temporary URI permission expiry
+      const destDir = FileSystem.cacheDirectory + 'import/';
+      await FileSystem.makeDirectoryAsync(destDir, { intermediates: true });
+      const destUri = destDir + Date.now() + '_' + (name || 'import');
+      await FileSystem.copyAsync({ from: pickedUri, to: destUri });
+
+      setImportUri(destUri);
       setImportName(name);
       setShowImport(true);
     } catch {
