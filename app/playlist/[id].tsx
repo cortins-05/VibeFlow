@@ -11,13 +11,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Play, Shuffle, Trash2, ListMusic, Edit3, ChevronUp, ChevronDown } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Image } from 'expo-image';
 import { MotiView } from 'moti';
 import TrackRow from '../../components/TrackRow';
+import SectionHeader from '../../components/ui/SectionHeader';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import type { PlaylistTrack } from '../../services/db';
+import { COLORS, FONTS, glow } from '../../constants/theme';
 
 function totalDuration(tracks: PlaylistTrack[]): string {
   const total = tracks.reduce((acc, t) => acc + (t.duration ?? 0), 0);
@@ -115,35 +116,35 @@ export default function PlaylistScreen() {
   const coverArt = tracks[0]?.artwork;
 
   return (
-    <View className="flex-1 bg-[#0e0c0a]">
-      <LinearGradient
-        colors={['rgba(255,92,46,0.32)', 'rgba(232,182,122,0.08)', '#0a0907']}
-        locations={[0, 0.35, 1]}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 460 }}
-      />
-      <SafeAreaView className="flex-1" edges={['top']}>
-        <View className="flex-row items-center px-5 pt-2 pb-2 justify-between">
+    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+        {/* Header */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4, justifyContent: 'space-between' }}>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="w-10 h-10 items-center justify-center"
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <ChevronLeft color="#f5efe3" size={24} />
+            <ChevronLeft color={COLORS.text} size={22} />
           </TouchableOpacity>
-          <View className="flex-row">
+          <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
+            vibeflow <Text style={{ color: COLORS.secondary }}>~/playlist</Text>{' '}
+            <Text style={{ color: COLORS.accent }}>$</Text>
+          </Text>
+          <View style={{ flexDirection: 'row' }}>
             <TouchableOpacity
               onPress={openRename}
-              className="w-10 h-10 items-center justify-center mr-2"
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginRight: 4 }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Edit3 color="#a08a78" size={16} strokeWidth={1.6} />
+              <Edit3 color={COLORS.textDim} size={15} strokeWidth={1.6} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleDelete}
-              className="w-10 h-10 items-center justify-center"
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Trash2 color="#5a4d42" size={18} strokeWidth={1.6} />
+              <Trash2 color={COLORS.textFaint} size={16} strokeWidth={1.6} />
             </TouchableOpacity>
           </View>
         </View>
@@ -152,102 +153,72 @@ export default function PlaylistScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 160 }}
         >
-          <View className="items-center px-8 pt-4 pb-6">
+          {/* Cover + meta */}
+          <View style={{ alignItems: 'center', paddingHorizontal: 32, paddingTop: 16, paddingBottom: 24 }}>
             <MotiView
               from={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ type: 'spring', damping: 16, stiffness: 100 }}
-              style={{
-                shadowColor: '#ff5c2e',
-                shadowOffset: { width: 0, height: 18 },
-                shadowOpacity: 0.4,
-                shadowRadius: 30,
-                elevation: 16,
-              }}
             >
               {coverArt ? (
                 <Image
                   source={{ uri: coverArt }}
                   style={{
-                    width: 200,
-                    height: 200,
-                    borderRadius: 8,
+                    width: 180,
+                    height: 180,
+                    borderRadius: 4,
                     borderWidth: 1,
-                    borderColor: 'rgba(245,239,227,0.08)',
+                    borderColor: COLORS.border,
                   }}
                   contentFit="cover"
                 />
               ) : (
                 <View
                   style={{
-                    width: 200,
-                    height: 200,
-                    borderRadius: 8,
-                    backgroundColor: '#1f1916',
+                    width: 180,
+                    height: 180,
+                    borderRadius: 4,
+                    backgroundColor: COLORS.surface,
                     borderWidth: 1,
-                    borderColor: 'rgba(245,239,227,0.08)',
+                    borderColor: COLORS.border,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
-                  <ListMusic color="#e8b67a" size={48} strokeWidth={1.4} />
+                  <ListMusic color={COLORS.secondary} size={44} strokeWidth={1.4} />
                 </View>
               )}
             </MotiView>
 
             <Text
-              style={{
-                fontFamily: 'Manrope_500Medium',
-                fontSize: 36,
-                lineHeight: 40,
-                color: '#f5efe3',
-                marginTop: 28,
-                textAlign: 'center',
-              }}
+              style={{ fontFamily: FONTS.sans, fontSize: 28, lineHeight: 32, color: COLORS.text, marginTop: 24, textAlign: 'center' }}
               numberOfLines={2}
             >
               {playlist?.name ?? 'Playlist'}
             </Text>
-            <Text
-              style={{
-                fontFamily: 'Manrope_400Regular',
-                fontSize: 12,
-                color: '#a08a78',
-                marginTop: 6,
-              }}
-            >
+            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim, marginTop: 6 }}>
               {tracks.length} tracks · {totalDuration(tracks)}
             </Text>
 
-            <View className="flex-row mt-6">
+            {/* Play / Shuffle */}
+            <View style={{ flexDirection: 'row', marginTop: 20 }}>
               <TouchableOpacity
                 onPress={handlePlay}
                 activeOpacity={0.85}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  backgroundColor: '#ff5c2e',
-                  paddingHorizontal: 22,
-                  paddingVertical: 13,
-                  borderRadius: 30,
+                  backgroundColor: COLORS.accent,
+                  paddingHorizontal: 20,
+                  paddingVertical: 11,
+                  borderRadius: 4,
                   marginRight: 10,
-                  shadowColor: '#ff5c2e',
-                  shadowOffset: { width: 0, height: 6 },
-                  shadowOpacity: 0.45,
-                  shadowRadius: 14,
-                  elevation: 8,
+                  ...glow(COLORS.accent, 8, 0.4),
                 }}
               >
-                <Play color="#f5efe3" size={16} fill="#f5efe3" />
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_500Medium',
-                    fontSize: 13,
-                    color: '#f5efe3',
-                    marginLeft: 8,
-                  }}
-                >
-                  Play
+                <Play color={COLORS.bg} size={14} fill={COLORS.bg} />
+                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.bg, marginLeft: 8, letterSpacing: 0.5 }}>
+                  PLAY
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -256,79 +227,58 @@ export default function PlaylistScreen() {
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  paddingHorizontal: 22,
-                  paddingVertical: 13,
-                  borderRadius: 30,
+                  paddingHorizontal: 20,
+                  paddingVertical: 11,
+                  borderRadius: 4,
                   borderWidth: 1,
-                  borderColor: 'rgba(245,239,227,0.12)',
+                  borderColor: COLORS.border,
                 }}
               >
-                <Shuffle color="#a08a78" size={16} strokeWidth={1.8} />
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_500Medium',
-                    fontSize: 13,
-                    color: '#a08a78',
-                    marginLeft: 8,
-                  }}
-                >
-                  Shuffle
+                <Shuffle color={COLORS.textDim} size={14} strokeWidth={1.8} />
+                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim, marginLeft: 8, letterSpacing: 0.5 }}>
+                  SHUFFLE
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
 
           {tracks.length === 0 && (
-            <View className="items-center py-10">
-              <Text
-                style={{
-                  fontFamily: 'Manrope_300Light',
-                  fontSize: 20,
-                  color: '#a08a78',
-                }}
-              >
-                No tracks yet.
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
+                // empty playlist
               </Text>
-              <Text
-                style={{
-                  fontFamily: 'Manrope_400Regular',
-                  fontSize: 12,
-                  color: '#5a4d42',
-                  marginTop: 8,
-                }}
-              >
-                Search and add tracks to this playlist
+              <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 6 }}>
+                search and add tracks
               </Text>
             </View>
           )}
 
+          {tracks.length > 0 && (
+            <SectionHeader label="tracks" count={tracks.length} />
+          )}
+
           {tracks.map((t, i) => (
-            <View key={t.id} className="flex-row items-center">
-              <View className="flex-col items-center pl-2 pr-1">
+            <View key={t.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {/* Reorder controls */}
+              <View style={{ flexDirection: 'column', alignItems: 'center', paddingLeft: 8, paddingRight: 4 }}>
                 <TouchableOpacity
-                  onPress={() => {
-                    moveTrackInPlaylist(t.id, id!, 'up');
-                    refreshTracks();
-                  }}
+                  onPress={() => { moveTrackInPlaylist(t.id, id!, 'up'); refreshTracks(); }}
                   disabled={i === 0}
-                  style={{ opacity: i === 0 ? 0.3 : 1 }}
+                  style={{ opacity: i === 0 ? 0.2 : 1 }}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <ChevronUp color="#5a4d42" size={16} strokeWidth={1.6} />
+                  <ChevronUp color={COLORS.textFaint} size={14} strokeWidth={1.6} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => {
-                    moveTrackInPlaylist(t.id, id!, 'down');
-                    refreshTracks();
-                  }}
+                  onPress={() => { moveTrackInPlaylist(t.id, id!, 'down'); refreshTracks(); }}
                   disabled={i === tracks.length - 1}
-                  style={{ opacity: i === tracks.length - 1 ? 0.3 : 1 }}
+                  style={{ opacity: i === tracks.length - 1 ? 0.2 : 1 }}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <ChevronDown color="#5a4d42" size={16} strokeWidth={1.6} />
+                  <ChevronDown color={COLORS.textFaint} size={14} strokeWidth={1.6} />
                 </TouchableOpacity>
               </View>
-              <View className="flex-1">
+              <View style={{ flex: 1 }}>
                 <TrackRow
                   track={{
                     videoId: t.video_id,
@@ -348,94 +298,65 @@ export default function PlaylistScreen() {
         </ScrollView>
       </SafeAreaView>
 
+      {/* Rename modal */}
       <Modal
         visible={showRename}
         transparent
         animationType="fade"
         onRequestClose={() => setShowRename(false)}
       >
-        <View
-          className="flex-1 items-center justify-center"
-          style={{ backgroundColor: 'rgba(10,9,7,0.85)' }}
-        >
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(11,12,11,0.88)' }}>
           <View
             style={{
-              backgroundColor: '#1f1916',
-              borderRadius: 24,
-              padding: 28,
+              backgroundColor: COLORS.surface,
+              borderRadius: 6,
+              padding: 24,
               marginHorizontal: 24,
               width: '100%',
               maxWidth: 360,
               borderWidth: 1,
-              borderColor: 'rgba(245,239,227,0.08)',
+              borderColor: COLORS.borderAccent,
             }}
           >
-            <Text
-              style={{
-                fontFamily: 'Manrope_500Medium',
-                fontSize: 24,
-                color: '#f5efe3',
-              }}
-            >
-              Rename playlist
+            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1.8, color: COLORS.accent }}>
+              RENAME · PLAYLIST
             </Text>
             <TextInput
               value={renameValue}
               onChangeText={setRenameValue}
-              placeholder="Playlist name"
-              placeholderTextColor="#5a4d42"
+              placeholder="playlist name"
+              placeholderTextColor={COLORS.textFaint}
               autoFocus
               onSubmitEditing={handleRename}
               style={{
-                fontFamily: 'Manrope_500Medium',
-                fontSize: 16,
-                color: '#f5efe3',
-                paddingVertical: 12,
+                fontFamily: FONTS.mono,
+                fontSize: 14,
+                color: COLORS.text,
+                paddingVertical: 10,
                 borderBottomWidth: 1,
-                borderBottomColor: 'rgba(245,239,227,0.12)',
-                marginTop: 16,
-                marginBottom: 24,
+                borderBottomColor: COLORS.borderAccent,
+                marginTop: 12,
+                marginBottom: 20,
               }}
             />
-            <View className="flex-row">
+            <View style={{ flexDirection: 'row' }}>
               <TouchableOpacity
                 onPress={() => setShowRename(false)}
-                style={{
-                  flex: 1,
-                  paddingVertical: 14,
-                  alignItems: 'center',
-                  marginRight: 8,
-                }}
+                style={{ flex: 1, paddingVertical: 12, alignItems: 'center', marginRight: 8 }}
               >
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_500Medium',
-                    fontSize: 13,
-                    color: '#a08a78',
-                  }}
-                >
-                  Cancel
-                </Text>
+                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>CANCEL</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleRename}
                 style={{
                   flex: 1,
-                  paddingVertical: 14,
-                  borderRadius: 12,
-                  backgroundColor: '#ff5c2e',
+                  paddingVertical: 12,
+                  borderRadius: 4,
+                  backgroundColor: COLORS.accent,
                   alignItems: 'center',
                 }}
               >
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_500Medium',
-                    fontSize: 13,
-                    color: '#f5efe3',
-                  }}
-                >
-                  Rename
-                </Text>
+                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.bg }}>RENAME</Text>
               </TouchableOpacity>
             </View>
           </View>

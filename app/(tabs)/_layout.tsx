@@ -1,32 +1,18 @@
 import { Tabs } from 'expo-router';
 import { View, Text, Pressable } from 'react-native';
-import { Home, Library, Search, Settings } from 'lucide-react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useEffect } from 'react';
 import MiniPlayer from '../../components/MiniPlayer';
+import { COLORS, FONTS, glow } from '../../constants/theme';
 
 const TABS = [
-  { name: 'index', label: 'Discover', Icon: Home },
-  { name: 'search', label: 'Search', Icon: Search },
-  { name: 'library', label: 'Library', Icon: Library },
-  { name: 'settings', label: 'Settings', Icon: Settings },
+  { name: 'index', label: 'discover' },
+  { name: 'search', label: 'search' },
+  { name: 'library', label: 'library' },
+  { name: 'settings', label: 'settings' },
 ] as const;
 
-function TabButton({
-  label,
-  Icon,
-  focused,
-  onPress,
-}: {
-  label: string;
-  Icon: typeof Home;
-  focused: boolean;
-  onPress: () => void;
-}) {
+function TabButton({ label, focused, onPress }: { label: string; focused: boolean; onPress: () => void }) {
   const scale = useSharedValue(focused ? 1 : 0.92);
   const indicator = useSharedValue(focused ? 1 : 0);
 
@@ -38,41 +24,25 @@ function TabButton({
   const wrap = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const bar = useAnimatedStyle(() => ({
     opacity: indicator.value,
-    width: 18 * indicator.value,
+    width: 16 * indicator.value,
   }));
 
   return (
-    <Pressable
-      onPress={onPress}
-      className="flex-1 items-center justify-center"
-      style={{ paddingTop: 10 }}
-    >
-      <Animated.View style={wrap} className="items-center">
-        <Icon
-          color={focused ? '#ff5c2e' : '#5a4d42'}
-          size={20}
-          strokeWidth={focused ? 2.2 : 1.8}
-        />
+    <Pressable onPress={onPress} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 10 }}>
+      <Animated.View style={[wrap, { alignItems: 'center' }]}>
         <Text
           style={{
-            fontFamily: 'Manrope_500Medium',
+            fontFamily: FONTS.mono,
             fontSize: 10,
-            color: focused ? '#f5efe3' : '#5a4d42',
-            marginTop: 4,
+            letterSpacing: 0.5,
+            color: focused ? COLORS.accent : COLORS.textFaint,
+            ...(focused ? glow(COLORS.accent, 6, 0.5) : {}),
           }}
         >
-          {label}
+          {focused ? `[${label}]` : label}
         </Text>
         <Animated.View
-          style={[
-            bar,
-            {
-              height: 2,
-              borderRadius: 2,
-              backgroundColor: '#ff5c2e',
-              marginTop: 4,
-            },
-          ]}
+          style={[bar, { height: 2, borderRadius: 1, backgroundColor: COLORS.accent, marginTop: 4 }]}
         />
       </Animated.View>
     </Pressable>
@@ -81,16 +51,16 @@ function TabButton({
 
 export default function TabLayout() {
   return (
-    <View style={{ flex: 1, backgroundColor: '#0a0907' }}>
+    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
       <Tabs
         screenOptions={{ headerShown: false }}
         tabBar={({ state, navigation }) => (
           <View
             style={{
               flexDirection: 'row',
-              backgroundColor: '#0a0907',
+              backgroundColor: COLORS.bg,
               borderTopWidth: 1,
-              borderTopColor: 'rgba(245,239,227,0.06)',
+              borderTopColor: COLORS.border,
               height: 72,
               paddingBottom: 12,
             }}
@@ -103,7 +73,6 @@ export default function TabLayout() {
                 <TabButton
                   key={route.key}
                   label={tab.label}
-                  Icon={tab.Icon}
                   focused={focused}
                   onPress={() => {
                     const event = navigation.emit({

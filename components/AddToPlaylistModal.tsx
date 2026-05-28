@@ -3,6 +3,7 @@ import { Plus, ListMusic } from 'lucide-react-native';
 import { useState } from 'react';
 import { useLibraryStore } from '../stores/libraryStore';
 import type { Track } from '../stores/playerStore';
+import { COLORS, FONTS } from '../constants/theme';
 
 interface Props {
   visible: boolean;
@@ -37,73 +38,58 @@ export default function AddToPlaylistModal({ visible, track, onClose, onDone }: 
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View
-        className="flex-1 justify-end"
-        style={{ backgroundColor: 'rgba(10,9,7,0.7)' }}
-      >
+      <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(11,12,11,0.8)' }}>
         <View
           style={{
-            backgroundColor: '#1f1916',
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            paddingTop: 24,
+            backgroundColor: COLORS.surface,
+            borderTopLeftRadius: 6,
+            borderTopRightRadius: 6,
+            paddingTop: 20,
             paddingBottom: 40,
             borderWidth: 1,
-            borderColor: 'rgba(245,239,227,0.06)',
+            borderColor: COLORS.border,
             borderBottomWidth: 0,
             maxHeight: '70%',
           }}
         >
-          <View className="px-6 pb-4 flex-row items-center justify-between">
-            <Text
-              style={{
-                fontFamily: 'Manrope_500Medium',
-                fontSize: 18,
-                color: '#f5efe3',
-              }}
-              numberOfLines={1}
-            >
-              Add to playlist
+          <View style={{ paddingHorizontal: 20, paddingBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.accent, letterSpacing: 1 }}>
+              ADD TO PLAYLIST
             </Text>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Text style={{ fontFamily: 'Manrope_500Medium', fontSize: 13, color: '#a08a78' }}>
-                Cancel
-              </Text>
+              <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>[ close ]</Text>
             </TouchableOpacity>
           </View>
 
-          <ScrollView className="px-6">
+          <ScrollView style={{ paddingHorizontal: 20 }}>
             {!showCreate ? (
               <>
                 <TouchableOpacity
                   onPress={() => setShowCreate(true)}
-                  className="flex-row items-center py-4"
                   style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingVertical: 14,
                     borderBottomWidth: 1,
-                    borderBottomColor: 'rgba(245,239,227,0.06)',
+                    borderBottomColor: COLORS.border,
                   }}
                 >
                   <View
                     style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 8,
-                      backgroundColor: 'rgba(255,92,46,0.1)',
+                      width: 36,
+                      height: 36,
+                      borderRadius: 4,
+                      backgroundColor: 'rgba(229,255,58,0.08)',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      borderWidth: 1,
+                      borderColor: COLORS.borderAccent,
                     }}
                   >
-                    <Plus color="#ff5c2e" size={20} />
+                    <Plus color={COLORS.accent} size={16} />
                   </View>
-                  <Text
-                    style={{
-                      fontFamily: 'Manrope_500Medium',
-                      fontSize: 15,
-                      color: '#f5efe3',
-                      marginLeft: 14,
-                    }}
-                  >
-                    New playlist
+                  <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.accent, marginLeft: 14 }}>
+                    [ new playlist ]
                   </Text>
                 </TouchableOpacity>
 
@@ -111,107 +97,92 @@ export default function AddToPlaylistModal({ visible, track, onClose, onDone }: 
                   <TouchableOpacity
                     key={pl.id}
                     onPress={() => handleSelect(pl.id)}
-                    className="flex-row items-center py-4"
                     style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      paddingVertical: 14,
                       borderBottomWidth: 1,
-                      borderBottomColor: 'rgba(245,239,227,0.04)',
+                      borderBottomColor: COLORS.border,
                     }}
                   >
                     <View
                       style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 8,
-                        backgroundColor: 'rgba(245,239,227,0.04)',
+                        width: 36,
+                        height: 36,
+                        borderRadius: 4,
+                        backgroundColor: COLORS.bg,
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}
                     >
-                      <ListMusic color="#e8b67a" size={18} />
+                      <ListMusic color={COLORS.secondary} size={16} />
                     </View>
-                    <View className="flex-1 ml-3">
-                      <Text
-                        style={{
-                          fontFamily: 'Manrope_500Medium',
-                          fontSize: 15,
-                          color: '#f5efe3',
-                        }}
-                        numberOfLines={1}
-                      >
-                        {pl.name}
-                      </Text>
-                    </View>
+                    <Text
+                      style={{ flex: 1, fontFamily: FONTS.sans, fontSize: 14, color: COLORS.text, marginLeft: 14 }}
+                      numberOfLines={1}
+                    >
+                      {pl.name}
+                    </Text>
                   </TouchableOpacity>
                 ))}
 
                 {playlists.length === 0 && (
-                  <Text
-                    style={{
-                      fontFamily: 'Manrope_400Regular',
-                      fontSize: 13,
-                      color: '#5a4d42',
-                      textAlign: 'center',
-                      paddingVertical: 20,
-                    }}
-                  >
-                    No playlists yet. Create one!
+                  <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textFaint, textAlign: 'center', paddingVertical: 20 }}>
+                    // no playlists yet
                   </Text>
                 )}
               </>
             ) : (
-              <View className="py-4">
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_500Medium',
-                    fontSize: 16,
-                    color: '#f5efe3',
-                    marginBottom: 12,
-                  }}
-                >
-                  New playlist
+              <View style={{ paddingVertical: 16 }}>
+                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.accent, letterSpacing: 1, marginBottom: 12 }}>
+                  NEW PLAYLIST
                 </Text>
                 <View
-                  className="flex-row items-center bg-[#0e0c0a] rounded-xl px-4"
-                  style={{ borderWidth: 1, borderColor: 'rgba(245,239,227,0.08)' }}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: COLORS.bg,
+                    borderRadius: 4,
+                    borderWidth: 1,
+                    borderColor: COLORS.borderAccent,
+                    paddingHorizontal: 12,
+                  }}
                 >
+                  <Text style={{ fontFamily: FONTS.mono, fontSize: 13, color: COLORS.accent, marginRight: 8 }}>{'>'}</Text>
                   <TextInput
                     value={newName}
                     onChangeText={setNewName}
-                    placeholder="Name"
-                    placeholderTextColor="#5a4d42"
+                    placeholder="name..."
+                    placeholderTextColor={COLORS.textFaint}
                     autoFocus
                     onSubmitEditing={handleCreate}
                     style={{
                       flex: 1,
-                      fontFamily: 'Manrope_400Regular',
-                      fontSize: 14,
-                      color: '#f5efe3',
-                      paddingVertical: 12,
+                      fontFamily: FONTS.mono,
+                      fontSize: 13,
+                      color: COLORS.text,
+                      paddingVertical: 11,
                     }}
                   />
                 </View>
-                <View className="flex-row mt-4">
+                <View style={{ flexDirection: 'row', marginTop: 16 }}>
                   <TouchableOpacity
                     onPress={() => setShowCreate(false)}
-                    style={{ flex: 1, paddingVertical: 12, alignItems: 'center' }}
+                    style={{ flex: 1, paddingVertical: 11, alignItems: 'center' }}
                   >
-                    <Text style={{ fontFamily: 'Manrope_500Medium', fontSize: 13, color: '#a08a78' }}>
-                      Back
-                    </Text>
+                    <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>BACK</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleCreate}
                     style={{
                       flex: 1,
-                      paddingVertical: 12,
-                      borderRadius: 10,
-                      backgroundColor: '#ff5c2e',
+                      paddingVertical: 11,
+                      borderRadius: 4,
+                      backgroundColor: COLORS.accent,
                       alignItems: 'center',
                     }}
                   >
-                    <Text style={{ fontFamily: 'Manrope_500Medium', fontSize: 13, color: '#f5efe3' }}>
-                      Create
-                    </Text>
+                    <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.bg }}>CREATE</Text>
                   </TouchableOpacity>
                 </View>
               </View>

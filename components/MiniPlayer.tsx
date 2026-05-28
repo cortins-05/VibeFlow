@@ -2,15 +2,17 @@ import { memo, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { BlurView } from 'expo-blur';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { Play, Pause, SkipForward } from 'lucide-react-native';
 import TrackPlayer, { usePlaybackState, useProgress, State } from 'react-native-track-player';
 import { usePlayerStore } from '../stores/playerStore';
+import { COLORS, FONTS, glow } from '../constants/theme';
+
+function fmt(s: number) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
 
 const MiniPlayer = memo(function MiniPlayer() {
   const router = useRouter();
@@ -34,83 +36,80 @@ const MiniPlayer = memo(function MiniPlayer() {
 
   if (!currentTrack) return null;
 
-  const progressRatio =
-    progress.duration > 0 ? progress.position / progress.duration : 0;
+  const progressRatio = progress.duration > 0 ? progress.position / progress.duration : 0;
 
   return (
     <Animated.View
       style={[animStyle, { position: 'absolute', bottom: 78, left: 0, right: 0, zIndex: 50 }]}
     >
       <Pressable onPress={() => router.push('/player')}>
-        <BlurView
-          intensity={90}
-          tint="dark"
+        <View
           style={{
             marginHorizontal: 12,
-            borderRadius: 16,
+            borderRadius: 6,
             overflow: 'hidden',
             borderWidth: 1,
-            borderColor: 'rgba(245,239,227,0.08)',
-            backgroundColor: 'rgba(31,25,22,0.6)',
+            borderColor: COLORS.border,
+            backgroundColor: COLORS.surface,
           }}
         >
-          <View className="flex-row items-center px-3 py-3">
+          <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10 }}>
+            <Text
+              style={{
+                fontFamily: FONTS.mono,
+                fontSize: 14,
+                color: COLORS.accent,
+                marginRight: 10,
+                ...glow(COLORS.accent, 4, 0.5),
+              }}
+            >
+              {isPlaying ? '▶' : '❚❚'}
+            </Text>
             <Image
               source={{ uri: currentTrack.artwork }}
-              style={{ width: 42, height: 42, borderRadius: 6, backgroundColor: '#15110e' }}
+              style={{ width: 36, height: 36, borderRadius: 4, backgroundColor: COLORS.surface }}
               contentFit="cover"
             />
-            <View className="flex-1 min-w-0 ml-3">
+            <View style={{ flex: 1, minWidth: 0, marginLeft: 10 }}>
               <Text
-                style={{
-                  fontFamily: 'Manrope_500Medium',
-                  fontSize: 16,
-                  lineHeight: 18,
-                  color: '#f5efe3',
-                }}
+                style={{ fontFamily: FONTS.sans, fontSize: 14, lineHeight: 16, color: COLORS.text }}
                 numberOfLines={1}
               >
                 {currentTrack.title}
               </Text>
               <Text
-                style={{
-                  fontFamily: 'Manrope_500Medium',
-                  fontSize: 10,
-                  letterSpacing: 0.4,
-                  color: '#a08a78',
-                  marginTop: 2,
-                }}
+                style={{ fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 0.4, color: COLORS.textDim, marginTop: 2 }}
                 numberOfLines={1}
               >
-                {currentTrack.artist}
+                {currentTrack.artist.toUpperCase()} · {fmt(progress.position)}/{fmt(progress.duration)}
               </Text>
             </View>
-            <View className="flex-row items-center">
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 onPress={() => (isPlaying ? TrackPlayer.pause() : TrackPlayer.play())}
-                className="w-9 h-9 items-center justify-center"
+                style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
               >
                 {isPlaying ? (
-                  <Pause color="#f5efe3" size={18} fill="#f5efe3" />
+                  <Pause color={COLORS.accent} size={16} fill={COLORS.accent} />
                 ) : (
-                  <Play color="#f5efe3" size={18} fill="#f5efe3" />
+                  <Play color={COLORS.accent} size={16} fill={COLORS.accent} />
                 )}
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => TrackPlayer.skipToNext()}
-                className="w-9 h-9 items-center justify-center"
+                style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
               >
-                <SkipForward color="#a08a78" size={18} />
+                <SkipForward color={COLORS.textDim} size={16} />
               </TouchableOpacity>
             </View>
           </View>
           <View
             style={{
               height: 2,
-              backgroundColor: 'rgba(245,239,227,0.06)',
+              backgroundColor: COLORS.border,
               marginHorizontal: 12,
-              marginBottom: 8,
-              borderRadius: 2,
+              marginBottom: 6,
+              borderRadius: 1,
               overflow: 'hidden',
             }}
           >
@@ -118,11 +117,11 @@ const MiniPlayer = memo(function MiniPlayer() {
               style={{
                 height: '100%',
                 width: `${progressRatio * 100}%`,
-                backgroundColor: '#ff5c2e',
+                backgroundColor: COLORS.accent,
               }}
             />
           </View>
-        </BlurView>
+        </View>
       </Pressable>
     </Animated.View>
   );

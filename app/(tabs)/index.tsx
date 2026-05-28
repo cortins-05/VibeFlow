@@ -1,29 +1,33 @@
 import { useEffect, useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Sparkles } from 'lucide-react-native';
-import { MotiView } from 'moti';
 import { useRouter } from 'expo-router';
 import TrackRow from '../../components/TrackRow';
 import AddToPlaylistModal from '../../components/AddToPlaylistModal';
+import ConsoleHeader from '../../components/ui/ConsoleHeader';
+import SectionHeader from '../../components/ui/SectionHeader';
 import { getTrending, searchYouTube, type VideoInfo } from '../../services/youtube';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useLibraryStore } from '../../stores/libraryStore';
+import { COLORS, FONTS } from '../../constants/theme';
 
 const MOODS = [
-  { label: 'Chill', query: 'chill vibes music' },
-  { label: 'Focus', query: 'focus instrumental' },
-  { label: 'Hype', query: 'hype playlist' },
-  { label: 'Late Night', query: 'late night drive' },
+  { label: '#chill', query: 'chill vibes music' },
+  { label: '#focus', query: 'focus instrumental' },
+  { label: '#hype', query: 'hype playlist' },
+  { label: '#latenight', query: 'late night drive' },
 ];
+
+function toTrack(v: VideoInfo) {
+  return {
+    id: v.videoId,
+    videoId: v.videoId,
+    title: v.title,
+    artist: v.artist,
+    artwork: v.artwork,
+    duration: v.duration,
+  };
+}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -70,24 +74,11 @@ export default function HomeScreen() {
     setRefreshing(false);
   }, [loadTrending]);
 
-  function toTrack(v: VideoInfo) {
-    return {
-      id: v.videoId,
-      videoId: v.videoId,
-      title: v.title,
-      artist: v.artist,
-      artwork: v.artwork,
-      duration: v.duration,
-    };
-  }
-
   return (
-    <View className="flex-1 bg-[#0e0c0a]">
-      <LinearGradient
-        colors={['rgba(255,92,46,0.08)', 'rgba(255,92,46,0.02)', 'rgba(10,9,7,0)']}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 300 }}
-      />
-      <SafeAreaView className="flex-1" edges={['top']}>
+    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+        <ConsoleHeader path="discover" title="Discover" />
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 160 }}
@@ -95,92 +86,45 @@ export default function HomeScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#ff5c2e"
-              progressBackgroundColor="#1f1916"
+              tintColor={COLORS.accent}
+              progressBackgroundColor={COLORS.surface}
             />
           }
         >
-          <View className="px-6 pt-4 pb-4">
-            <MotiView
-              from={{ opacity: 0, translateY: -6 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              transition={{ type: 'timing', duration: 500 }}
-            >
-              <View className="flex-row items-end">
-                <Text
-                  style={{ fontFamily: 'Manrope_300Light', fontSize: 48, lineHeight: 52 }}
-                  className="text-cream"
-                >
-                  Discover
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_300Light',
-                    fontSize: 48,
-                    lineHeight: 52,
-                  }}
-                  className="text-accent"
-                >
-                  .
-                </Text>
-              </View>
-              <Text
+          {/* Mood tags */}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 20, marginBottom: 16 }}>
+            {MOODS.map((mood) => (
+              <TouchableOpacity
+                key={mood.label}
+                onPress={() =>
+                  router.push({
+                    pathname: '/(tabs)/search' as any,
+                    params: { q: mood.query },
+                  })
+                }
+                activeOpacity={0.7}
                 style={{
-                  fontFamily: 'Manrope_400Regular',
-                  fontSize: 14,
-                  color: '#a08a78',
-                  marginTop: 4,
+                  backgroundColor: COLORS.surface,
+                  borderRadius: 4,
+                  paddingHorizontal: 12,
+                  paddingVertical: 7,
+                  borderWidth: 1,
+                  borderColor: COLORS.border,
+                  marginRight: 8,
+                  marginBottom: 8,
                 }}
               >
-                Find your next favorite track
-              </Text>
-            </MotiView>
+                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.secondary }}>
+                  {mood.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
-          <View className="px-6 mb-6">
-            <View className="flex-row flex-wrap">
-              {MOODS.map((mood) => (
-                <TouchableOpacity
-                  key={mood.label}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/(tabs)/search' as any,
-                      params: { q: mood.query },
-                    })
-                  }
-                  activeOpacity={0.7}
-                  style={{
-                    backgroundColor: '#1f1916',
-                    borderRadius: 999,
-                    paddingHorizontal: 16,
-                    paddingVertical: 10,
-                    borderWidth: 1,
-                    borderColor: 'rgba(245,239,227,0.08)',
-                    marginRight: 8,
-                    marginBottom: 8,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Sparkles color="#e8b67a" size={12} strokeWidth={1.8} />
-                  <Text
-                    style={{
-                      fontFamily: 'Manrope_500Medium',
-                      fontSize: 13,
-                      color: '#f5efe3',
-                      marginLeft: 6,
-                    }}
-                  >
-                    {mood.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
+          {/* Recent history */}
           {history.length > 0 && (
-            <View className="mb-4">
-              <SectionHeader text="Recently Played" count={history.length} />
+            <View style={{ marginBottom: 4 }}>
+              <SectionHeader label="Recently Played" count={history.length} />
               {history.slice(0, 5).map((h, i) => (
                 <TrackRow
                   key={h.video_id}
@@ -232,47 +176,37 @@ export default function HomeScreen() {
             </View>
           )}
 
-          <View className="mb-4">
-            <SectionHeader text="Trending" count={trending.length} />
+          {/* Trending */}
+          <View style={{ marginBottom: 4 }}>
+            <SectionHeader label="Trending" count={trending.length} />
 
             {isLoadingTrending && (
-              <View className="items-center py-12">
-                <ActivityIndicator color="#ff5c2e" size="small" />
+              <View style={{ alignItems: 'center', paddingVertical: 48 }}>
+                <ActivityIndicator color={COLORS.accent} size="small" />
+                <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 12, letterSpacing: 1.4 }}>
+                  LOADING...
+                </Text>
               </View>
             )}
 
             {trendingError && !isLoadingTrending && (
-              <View className="items-center py-8 px-6">
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_400Regular',
-                    fontSize: 15,
-                    color: '#a08a78',
-                    textAlign: 'center',
-                  }}
-                >
-                  Couldn't load trending right now.
+              <View style={{ alignItems: 'center', paddingVertical: 32, paddingHorizontal: 24 }}>
+                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.error, letterSpacing: 1 }}>
+                  ERR: fetch failed
                 </Text>
                 <TouchableOpacity
                   onPress={loadTrending}
                   style={{
                     marginTop: 12,
-                    paddingHorizontal: 20,
-                    paddingVertical: 10,
-                    borderRadius: 8,
-                    backgroundColor: '#1f1916',
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    borderRadius: 4,
                     borderWidth: 1,
-                    borderColor: 'rgba(245,239,227,0.1)',
+                    borderColor: COLORS.borderAccent,
                   }}
                 >
-                  <Text
-                    style={{
-                      fontFamily: 'Manrope_500Medium',
-                      fontSize: 13,
-                      color: '#f5efe3',
-                    }}
-                  >
-                    Try again
+                  <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.accent }}>
+                    [ retry ]
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -298,9 +232,7 @@ export default function HomeScreen() {
                     })
                   }
                   onLongPress={() => setAddToListTrack(video)}
-                  onPress={() => {
-                    playQueue(trending.map(toTrack), i);
-                  }}
+                  onPress={() => playQueue(trending.map(toTrack), i)}
                 />
               ))}
           </View>
@@ -311,44 +243,6 @@ export default function HomeScreen() {
         visible={!!addToListTrack}
         track={addToListTrack ? { id: addToListTrack.videoId, ...addToListTrack } : null}
         onClose={() => setAddToListTrack(null)}
-      />
-    </View>
-  );
-}
-
-function SectionHeader({ text, count }: { text: string; count: number }) {
-  return (
-    <View className="flex-row items-center px-6 mb-3">
-      <View
-        style={{ width: 4, height: 16, borderRadius: 2, backgroundColor: '#ff5c2e' }}
-      />
-      <Text
-        style={{
-          fontFamily: 'Manrope_500Medium',
-          fontSize: 15,
-          marginLeft: 10,
-          color: '#f5efe3',
-        }}
-      >
-        {text}
-      </Text>
-      <Text
-        style={{
-          fontFamily: 'Manrope_400Regular',
-          fontSize: 12,
-          marginLeft: 6,
-          color: '#5a4d42',
-        }}
-      >
-        {String(count).padStart(2, '0')}
-      </Text>
-      <View
-        style={{
-          flex: 1,
-          height: 1,
-          backgroundColor: 'rgba(245,239,227,0.06)',
-          marginLeft: 10,
-        }}
       />
     </View>
   );

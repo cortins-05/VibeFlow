@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Download, Pause, Play } from 'lucide-react-native';
+import { COLORS, FONTS } from '../constants/theme';
 
 interface Props {
   state: 'idle' | 'downloading' | 'pausing' | 'paused' | 'done' | 'error';
@@ -16,23 +17,20 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
     return (
       <TouchableOpacity
         onPress={onDownload}
-        className="flex-row items-center px-4 py-2 rounded-full ml-2"
         style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 12,
+          paddingVertical: 7,
+          borderRadius: 4,
           borderWidth: 1,
-          borderColor: 'rgba(245,239,227,0.08)',
-          backgroundColor: 'transparent',
+          borderColor: COLORS.border,
+          marginLeft: 8,
         }}
       >
-        <Download color="#a08a78" size={14} />
-        <Text
-          style={{
-            fontFamily: 'Manrope_500Medium',
-            fontSize: 12,
-            color: '#a08a78',
-            marginLeft: 6,
-          }}
-        >
-          Download
+        <Download color={COLORS.textDim} size={12} />
+        <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim, marginLeft: 6 }}>
+          [ dl ]
         </Text>
       </TouchableOpacity>
     );
@@ -40,50 +38,41 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
 
   if (state === 'downloading' || state === 'pausing') {
     return (
-      <View className="flex-row items-center ml-2">
-        <View style={{ width: 120 }}>
-          <View
-            className="rounded-full overflow-hidden"
-            style={{
-              height: 4,
-              backgroundColor: 'rgba(245,239,227,0.1)',
-            }}
-          >
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
+        <View style={{ width: 100 }}>
+          <View style={{ height: 3, backgroundColor: COLORS.border, borderRadius: 1, overflow: 'hidden' }}>
             <Animated.View
               style={{
                 height: '100%',
                 width: `${(progress ?? 0) * 100}%`,
-                backgroundColor: '#ff5c2e',
-                borderRadius: 2,
+                backgroundColor: COLORS.accent,
+                borderRadius: 1,
               }}
             />
           </View>
-          <Text
-            style={{
-              fontFamily: 'Manrope_400Regular',
-              fontSize: 10,
-              color: '#a08a78',
-              marginTop: 4,
-              textAlign: 'center',
-            }}
-          >
+          <Text style={{ fontFamily: FONTS.mono, fontSize: 9, color: COLORS.textDim, marginTop: 3, textAlign: 'center' }}>
             {Math.round((progress ?? 0) * 100)}%
           </Text>
         </View>
         <TouchableOpacity
           onPress={onPause}
           disabled={state === 'pausing'}
-          className="w-8 h-8 items-center justify-center ml-2"
           style={{
-            borderRadius: 20,
-            backgroundColor: 'rgba(245,239,227,0.08)',
+            width: 32,
+            height: 32,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginLeft: 8,
+            borderRadius: 4,
+            borderWidth: 1,
+            borderColor: COLORS.border,
           }}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           {state === 'pausing' ? (
-            <ActivityIndicator size="small" color="#a08a78" />
+            <ActivityIndicator size="small" color={COLORS.textDim} />
           ) : (
-            <Pause color="#a08a78" size={14} />
+            <Pause color={COLORS.textDim} size={12} />
           )}
         </TouchableOpacity>
       </View>
@@ -92,46 +81,37 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
 
   if (state === 'paused') {
     return (
-      <View className="flex-row items-center ml-2">
-        <View style={{ width: 120 }}>
-          <View
-            className="rounded-full overflow-hidden"
-            style={{
-              height: 4,
-              backgroundColor: 'rgba(245,239,227,0.1)',
-            }}
-          >
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
+        <View style={{ width: 100 }}>
+          <View style={{ height: 3, backgroundColor: COLORS.border, borderRadius: 1, overflow: 'hidden' }}>
             <Animated.View
               style={{
                 height: '100%',
                 width: `${(progress ?? 0) * 100}%`,
-                backgroundColor: '#e8b67a',
-                borderRadius: 2,
+                backgroundColor: COLORS.textDim,
+                borderRadius: 1,
               }}
             />
           </View>
-          <Text
-            style={{
-              fontFamily: 'Manrope_400Regular',
-              fontSize: 10,
-              color: '#a08a78',
-              marginTop: 4,
-              textAlign: 'center',
-            }}
-          >
-            Paused
+          <Text style={{ fontFamily: FONTS.mono, fontSize: 9, color: COLORS.textDim, marginTop: 3, textAlign: 'center' }}>
+            PAUSED
           </Text>
         </View>
         <TouchableOpacity
           onPress={onResume}
-          className="w-8 h-8 items-center justify-center ml-2"
           style={{
-            borderRadius: 20,
-            backgroundColor: 'rgba(232,182,122,0.15)',
+            width: 32,
+            height: 32,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginLeft: 8,
+            borderRadius: 4,
+            borderWidth: 1,
+            borderColor: COLORS.borderAccent,
           }}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Play color="#e8b67a" size={14} fill="#e8b67a" />
+          <Play color={COLORS.accent} size={12} fill={COLORS.accent} />
         </TouchableOpacity>
       </View>
     );
@@ -141,22 +121,19 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
     return (
       <TouchableOpacity
         onPress={onDismiss}
-        className="flex-row items-center px-4 py-2 rounded-full ml-2"
         style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 12,
+          paddingVertical: 7,
+          borderRadius: 4,
           borderWidth: 1,
-          borderColor: 'rgba(52,199,89,0.3)',
-          backgroundColor: 'rgba(52,199,89,0.1)',
+          borderColor: 'rgba(61,245,224,0.3)',
+          marginLeft: 8,
         }}
       >
-        <Text
-          style={{
-            fontFamily: 'Manrope_500Medium',
-            fontSize: 12,
-            color: '#34c759',
-            marginLeft: 6,
-          }}
-        >
-          Saved ✓
+        <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.secondary }}>
+          SAVED ✓
         </Text>
       </TouchableOpacity>
     );
@@ -165,22 +142,19 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
   return (
     <TouchableOpacity
       onPress={onDownload}
-      className="flex-row items-center px-4 py-2 rounded-full ml-2"
       style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+        borderRadius: 4,
         borderWidth: 1,
-        borderColor: 'rgba(255,69,58,0.3)',
-        backgroundColor: 'rgba(255,69,58,0.1)',
+        borderColor: 'rgba(255,77,77,0.3)',
+        marginLeft: 8,
       }}
     >
-      <Text
-        style={{
-          fontFamily: 'Manrope_500Medium',
-          fontSize: 12,
-          color: '#ff453a',
-          marginLeft: 6,
-        }}
-      >
-        Failed – tap retry
+      <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.error }}>
+        ERR · retry
       </Text>
     </TouchableOpacity>
   );

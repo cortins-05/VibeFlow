@@ -1,12 +1,12 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Download, ChevronLeft, Trash2 } from 'lucide-react-native';
-import { MotiView } from 'moti';
+import { ChevronLeft, Trash2 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import TrackRow from '../../components/TrackRow';
+import SectionHeader from '../../components/ui/SectionHeader';
 import { useDownloadStore } from '../../stores/downloadStore';
 import { usePlayerStore } from '../../stores/playerStore';
+import { COLORS, FONTS } from '../../constants/theme';
 
 export default function DownloadsScreen() {
   const router = useRouter();
@@ -14,23 +14,18 @@ export default function DownloadsScreen() {
   const { playQueue, currentTrack } = usePlayerStore();
 
   return (
-    <View className="flex-1 bg-[#0a0907]">
-      <LinearGradient
-        colors={['rgba(52,199,89,0.12)', 'rgba(10,9,7,0)']}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 280 }}
-      />
-      <SafeAreaView className="flex-1" edges={['top']}>
-        <View className="flex-row items-center px-5 pt-2 pb-2">
+    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="w-10 h-10 items-center justify-center"
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
-            <ChevronLeft color="#f5efe3" size={24} />
+            <ChevronLeft color={COLORS.text} size={22} />
           </TouchableOpacity>
-          <Text
-            style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#a08a78' }}
-          >
-            Downloads
+          <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
+            vibeflow <Text style={{ color: COLORS.secondary }}>~/downloads</Text>{' '}
+            <Text style={{ color: COLORS.accent }}>$</Text>
           </Text>
         </View>
 
@@ -38,54 +33,33 @@ export default function DownloadsScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 160 }}
         >
-          <View className="items-center px-8 pt-4 pb-6">
-            <MotiView
-              from={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: 'spring', damping: 16, stiffness: 100 }}
-            >
-              <View
-                style={{
-                  width: 100, height: 100, borderRadius: 50,
-                  backgroundColor: 'rgba(52,199,89,0.10)',
-                  alignItems: 'center', justifyContent: 'center',
-                  borderWidth: 1, borderColor: 'rgba(52,199,89,0.18)',
-                }}
-              >
-                <Download color="#34c759" size={36} />
-              </View>
-            </MotiView>
-            <Text
-              style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#a08a78', marginTop: 20 }}
-            >
-              Available offline
-            </Text>
-            <Text
-              style={{ fontFamily: 'Manrope_500Medium', fontSize: 32, lineHeight: 36, color: '#f5efe3', marginTop: 6, textAlign: 'center' }}
-            >
+          <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 }}>
+            <Text style={{ fontFamily: FONTS.sansLight, fontSize: 36, lineHeight: 40, color: COLORS.text }}>
               Downloads
             </Text>
-            <Text
-              style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#5a4d42', marginTop: 6 }}
-            >
-              {downloads.length} tracks
+            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.secondary, marginTop: 6, letterSpacing: 0.5 }}>
+              {downloads.length} files · OFFLINE
             </Text>
           </View>
 
           {downloads.length === 0 && (
-            <View className="items-center py-10">
-              <Text style={{ fontFamily: 'Manrope_300Light', fontSize: 20, color: '#a08a78' }}>
-                No downloads yet.
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
+                // no downloads
               </Text>
-              <Text style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#5a4d42', marginTop: 8 }}>
-                Download songs from the player
+              <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 6 }}>
+                download songs from the player
               </Text>
             </View>
           )}
 
+          {downloads.length > 0 && (
+            <SectionHeader label="offline" count={downloads.length} />
+          )}
+
           {downloads.map((d, i) => (
-            <View key={d.video_id} className="flex-row items-center">
-              <View className="flex-1">
+            <View key={d.video_id} style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flex: 1 }}>
                 <TrackRow
                   track={{
                     videoId: d.video_id,
@@ -96,25 +70,27 @@ export default function DownloadsScreen() {
                   }}
                   index={i}
                   isActive={currentTrack?.videoId === d.video_id}
-                  onPress={() => playQueue(
-                    downloads.map((dt) => ({
-                      id: dt.video_id,
-                      videoId: dt.video_id,
-                      title: dt.title,
-                      artist: dt.artist,
-                      artwork: dt.artwork,
-                      duration: dt.duration,
-                    })),
-                    i,
-                  )}
+                  onPress={() =>
+                    playQueue(
+                      downloads.map((dt) => ({
+                        id: dt.video_id,
+                        videoId: dt.video_id,
+                        title: dt.title,
+                        artist: dt.artist,
+                        artwork: dt.artwork,
+                        duration: dt.duration,
+                      })),
+                      i,
+                    )
+                  }
                 />
               </View>
               <TouchableOpacity
                 onPress={() => deleteDownload(d.video_id)}
-                className="pr-6 pl-2 py-4"
+                style={{ paddingRight: 20, paddingLeft: 8, paddingVertical: 16 }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Trash2 color="#5a4d42" size={16} />
+                <Trash2 color={COLORS.textFaint} size={16} />
               </TouchableOpacity>
             </View>
           ))}

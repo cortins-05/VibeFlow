@@ -1,10 +1,12 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Sliders, Trash2, Info, Headphones } from 'lucide-react-native';
-import { MotiView } from 'moti';
 import * as FileSystem from 'expo-file-system/legacy';
 import { useState, useEffect } from 'react';
+import ConsoleHeader from '../../components/ui/ConsoleHeader';
+import SectionHeader from '../../components/ui/SectionHeader';
+import StatusLine from '../../components/ui/StatusLine';
+import { COLORS, FONTS } from '../../constants/theme';
 
 export default function SettingsScreen() {
   const [cacheSize, setCacheSize] = useState('0.0');
@@ -42,146 +44,110 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-[#0e0c0a]">
-      <LinearGradient
-        colors={['rgba(255,92,46,0.10)', 'rgba(10,9,7,0)']}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 260 }}
-      />
-      <SafeAreaView className="flex-1" edges={['top']}>
+    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+        <ConsoleHeader path="settings" title="Settings" />
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 160 }}
         >
-          <View className="px-6 pt-2 pb-4">
-            <MotiView
-              from={{ opacity: 0, translateY: -6 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              transition={{ type: 'timing', duration: 500 }}
-            >
-              <Text
-                style={{ fontFamily: 'Manrope_400Regular', fontSize: 12, color: '#a08a78' }}
-              >
-                Preferences
-              </Text>
-              <View className="flex-row items-end mt-2">
-                <Text
-                  style={{ fontFamily: 'Manrope_300Light', fontSize: 48, lineHeight: 52 }}
-                  className="text-cream"
-                >
-                  Settings
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_300Light',
-                    fontSize: 48,
-                    lineHeight: 52,
-                  }}
-                  className="text-amber"
-                >
-                  .
-                </Text>
-              </View>
-            </MotiView>
-          </View>
-
-          <Section title="AUDIO">
-            <Row
-              icon={<Sliders color="#ff5c2e" size={18} strokeWidth={1.8} />}
-              accent
-              title="Equalizer"
-              subtitle="Tune frequency response"
-              meta="SOON"
+          {/* Audio */}
+          <SectionHeader label="audio" />
+          <View
+            style={{
+              marginHorizontal: 20,
+              backgroundColor: COLORS.surface,
+              borderRadius: 4,
+              overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: COLORS.border,
+            }}
+          >
+            <SettingsRow
+              glyph="≈"
+              glyphColor={COLORS.accent}
+              label="Equalizer"
+              value="SOON"
+              valueColor={COLORS.textFaint}
             />
             <Divider />
-            <Row
-              icon={<Headphones color="#e8b67a" size={18} strokeWidth={1.8} />}
-              title="Audio Quality"
-              subtitle="Auto · adaptive bitrate"
-              meta="HQ"
+            <SettingsRow
+              glyph="◉"
+              glyphColor={COLORS.secondary}
+              label="Audio Quality"
+              value="HQ · adaptive"
+              valueColor={COLORS.secondary}
             />
-          </Section>
+          </View>
 
-          <Section title="STORAGE">
-            <View
-              className="flex-row items-center py-5"
-              style={{ paddingHorizontal: 18 }}
-            >
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: 'rgba(245,239,227,0.04)',
-                }}
-              >
-                <Trash2 color="#a08a78" size={18} strokeWidth={1.8} />
-              </View>
-              <View className="flex-1 ml-3">
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_500Medium',
-                    fontSize: 20,
-                    lineHeight: 22,
-                    color: '#f5efe3',
-                  }}
-                >
+          {/* Storage */}
+          <SectionHeader label="storage" />
+          <View
+            style={{
+              marginHorizontal: 20,
+              backgroundColor: COLORS.surface,
+              borderRadius: 4,
+              overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: COLORS.border,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 }}>
+              <Text style={{ fontFamily: FONTS.mono, fontSize: 16, color: COLORS.textDim, width: 28 }}>⊙</Text>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={{ fontFamily: FONTS.sans, fontSize: 16, lineHeight: 20, color: COLORS.text }}>
                   Cache
                 </Text>
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_400Regular',
-                    fontSize: 12,
-                    color: '#a08a78',
-                    marginTop: 3,
-                  }}
-                >
-                  {cacheSize} MB in use
+                <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim, marginTop: 2 }}>
+                  {cacheSize} MB
                 </Text>
               </View>
               <TouchableOpacity
                 onPress={clearCache}
                 style={{
                   paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  borderRadius: 8,
+                  paddingVertical: 7,
+                  borderRadius: 4,
                   borderWidth: 1,
-                  borderColor: 'rgba(245,239,227,0.10)',
+                  borderColor: COLORS.border,
                 }}
               >
-                <Text
-                  style={{
-                    fontFamily: 'Manrope_500Medium',
-                    fontSize: 12,
-                    color: '#a08a78',
-                  }}
-                >
-                  Clear
+                <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim }}>
+                  [ clear ]
                 </Text>
               </TouchableOpacity>
             </View>
-          </Section>
+          </View>
 
-          <Section title="ABOUT">
-            <Row
-              icon={<Info color="#a08a78" size={18} strokeWidth={1.8} />}
-              title="VibeFlow"
-              subtitle="Sound for the curious."
-              meta="v1.0.0"
+          {/* About */}
+          <SectionHeader label="about" />
+          <View
+            style={{
+              marginHorizontal: 20,
+              backgroundColor: COLORS.surface,
+              borderRadius: 4,
+              overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: COLORS.border,
+            }}
+          >
+            <SettingsRow
+              glyph="ℹ"
+              glyphColor={COLORS.textDim}
+              label="VibeFlow"
+              value="v1.0.0"
+              valueColor={COLORS.textFaint}
             />
-          </Section>
+          </View>
 
-          <View className="items-center mt-8">
-            <Text
-              style={{
-                fontFamily: 'Manrope_300Light',
-                fontSize: 18,
-                color: '#3a322c',
-              }}
-            >
-              Made with care
-            </Text>
+          <View style={{ marginTop: 32, paddingHorizontal: 20 }}>
+            <StatusLine
+              segments={[
+                { text: 'vibeflow', color: COLORS.secondary },
+                { text: ' · v1.0.0 · android' },
+              ]}
+            />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -189,127 +155,34 @@ export default function SettingsScreen() {
   );
 }
 
-function Section({
-  title,
-  children,
+function SettingsRow({
+  glyph,
+  glyphColor,
+  label,
+  value,
+  valueColor,
 }: {
-  title: string;
-  children: React.ReactNode;
+  glyph: string;
+  glyphColor: string;
+  label: string;
+  value: string;
+  valueColor: string;
 }) {
   return (
-    <View className="mt-6 px-6">
-      <View className="flex-row items-center mb-3">
-        <View
-          style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#ff5c2e' }}
-        />
-        <Text
-          style={{
-            fontFamily: 'Manrope_500Medium',
-            fontSize: 13,
-            marginLeft: 8,
-            color: '#a08a78',
-          }}
-        >
-          {title}
-        </Text>
-        <View
-          style={{
-            flex: 1,
-            height: 1,
-            backgroundColor: 'rgba(245,239,227,0.06)',
-            marginLeft: 10,
-          }}
-        />
-      </View>
-      <View
-        style={{
-          backgroundColor: '#1f1916',
-          borderRadius: 18,
-          overflow: 'hidden',
-          borderWidth: 1,
-          borderColor: 'rgba(245,239,227,0.06)',
-        }}
-      >
-        {children}
-      </View>
-    </View>
-  );
-}
-
-function Row({
-  icon,
-  title,
-  subtitle,
-  meta,
-  accent,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  meta: string;
-  accent?: boolean;
-}) {
-  return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      className="flex-row items-center py-5"
-      style={{ paddingHorizontal: 18 }}
-    >
-      <View
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 20,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: accent ? 'rgba(255,92,46,0.10)' : 'rgba(245,239,227,0.04)',
-        }}
-      >
-        {icon}
-      </View>
-      <View className="flex-1 ml-3">
-        <Text
-          style={{
-            fontFamily: 'Manrope_500Medium',
-            fontSize: 20,
-            lineHeight: 22,
-            color: '#f5efe3',
-          }}
-        >
-          {title}
-        </Text>
-        <Text
-          style={{
-            fontFamily: 'Manrope_400Regular',
-            fontSize: 11,
-            color: '#a08a78',
-            marginTop: 3,
-          }}
-        >
-          {subtitle}
-        </Text>
-      </View>
-      <Text
-        style={{
-          fontFamily: 'Manrope_500Medium',
-          fontSize: 12,
-          color: accent ? '#ff5c2e' : '#5a4d42',
-        }}
-      >
-        {meta}
+    <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 }}>
+      <Text style={{ fontFamily: FONTS.mono, fontSize: 16, color: glyphColor, width: 28 }}>{glyph}</Text>
+      <Text style={{ flex: 1, fontFamily: FONTS.sans, fontSize: 16, lineHeight: 20, color: COLORS.text, marginLeft: 12 }}>
+        {label}
       </Text>
-    </TouchableOpacity>
+      <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: valueColor, letterSpacing: 0.5 }}>
+        {value}
+      </Text>
+    </View>
   );
 }
 
 function Divider() {
   return (
-    <View
-      style={{
-        height: 1,
-        backgroundColor: 'rgba(245,239,227,0.04)',
-        marginHorizontal: 18,
-      }}
-    />
+    <View style={{ height: 1, backgroundColor: COLORS.border, marginHorizontal: 16 }} />
   );
 }
