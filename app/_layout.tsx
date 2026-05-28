@@ -9,6 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import TrackPlayer, { Event } from 'react-native-track-player';
 import { StatusBar } from 'expo-status-bar';
 import { PlaybackService, setupPlayer } from '../services/trackPlayerService';
+import { COLORS } from '../constants/theme';
 import { initDatabase } from '../services/db';
 import { useLibraryStore } from '../stores/libraryStore';
 import { usePlayerStore } from '../stores/playerStore';
@@ -101,12 +102,12 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <View style={{ flex: 1, backgroundColor: '#f4efe2' }}>
-        <StatusBar style="dark" />
+      <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+        <StatusBar style="light" />
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: '#f4efe2' },
+            contentStyle: { backgroundColor: COLORS.bg },
           }}
         >
           <Stack.Screen name="(tabs)" />
