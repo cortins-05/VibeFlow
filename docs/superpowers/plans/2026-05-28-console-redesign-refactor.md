@@ -37,6 +37,63 @@
 
 ---
 
+## 🧭 CONTEXT FOR THE NEXT AI — read before touching anything
+
+This is the full briefing from the user. Honor it exactly. If anything conflicts, **ask the user, do not guess.**
+
+### 0. Skills to load (in order)
+This project is built with the **superpowers** plugin. On any non-trivial task:
+1. `superpowers:using-superpowers` (auto-loads at session start; establishes skill discipline).
+2. `superpowers:brainstorming` — BEFORE proposing a plan, if the task is open-ended.
+3. `superpowers:writing-plans` — to author Plan 2 (or any new plan) under `docs/superpowers/plans/`.
+4. `superpowers:executing-plans` (or `superpowers:subagent-driven-development` if subagents available) — to implement task-by-task.
+5. `superpowers:finishing-a-development-branch` — to close out (verify, push decision).
+- Also active globally: **context7 MCP** — use it to fetch current docs for ANY library/SDK/CLI (Expo, React Native, RNTP, youtubei.js, Skia, Reanimated, Kotlin/Android APIs) before writing code. The user's training data may be stale; Expo SDK 56 changed a lot. The repo `AGENTS.md` says: read https://docs.expo.dev/versions/v56.0.0/ before writing Expo code.
+- Caveman mode may be active (terse replies). Code/commits/PRs are always written normally.
+
+### 1. ⛔ ABSOLUTE RULE: DO NOT TOUCH BACKEND LOGIC
+The user spent serious effort reverse-engineering the YouTube playback + download pipeline. It is hard-won and fragile. **"Don't touch backend" = don't change *behavior*.** You MAY relocate logic verbatim into cleaner modules; you may NOT edit what it does. Full details live in **`INFORMACION_RELEVANTE.md`** (read it). The untouchable surface:
+
+| File / area | Why it's fragile |
+|---|---|
+| `services/youtube.ts` | `getBasicInfo` (never `getInfo` — it crashes), `ANDROID_VR` client returns **pre-deciphered** URLs (RN has no JS `vm` for `decipher()`), `CLIENT_CASCADE` fallbacks, per-client headers (YouTube 403s on header mismatch), `best.url ?? best.decipher()` rule. |
+| Download pipeline (`hooks/useTrackDownload.ts` — moved verbatim from player.tsx) | `createDownloadResumable` + `resumeData`/`downloadUrl` refs, `.webm`/`.m4a` ext logic, sanitized filename, `documentDirectory/audio/`, must send `CLIENT_HEADERS.ANDROID_VR` (incl. `Accept: '*/*'`) or downloads 403 mid-stream. Errors containing "cancelled"/"pause" are swallowed on purpose. |
+| `app/_layout.tsx` `PlaybackActiveTrackChanged` | Match by **`videoId`**, NOT `event.index` (always 0 — RNTP holds 1 track). |
+| Skip handlers in `app/player.tsx` | `skipToNext/Previous` don't work (1-track queue). Handlers iterate the **store queue** + call `playQueue()`. Prev = restart if >3s progress. |
+| `resolveSource()` in `stores/playerStore.ts` | Local-file-first: checks `downloadStore.getLocalPath(videoId)` → returns `file://` for offline; else fetches YouTube. |
+| `services/db.ts`, `services/trackPlayerService.ts`, all store *logic* | DB schema + RNTP setup + Zustand state machines. |
+
+If you must refactor, move code **verbatim** and verify identical behavior via `tsc` + a device run. When unsure whether a change affects behavior, treat it as off-limits and ask.
+
+### 2. 🎨 THE UI THE USER WANTS — "consola de programador / CMD futurista"
+A music player that looks **nothing like the usual**. Bold, unconventional, terminal/console aesthetic. Already implemented in Plan 1 — match this language for anything new:
+- **Palette** (single source: `constants/theme.ts`): `bg #0b0c0b`, `surface #121413`, `surface2 #1a1d1b`, `text #e6ebe3`, `textDim #6f7a6c`, `textFaint #3a423a`, **accent neon-yellow `#e5ff3a`** (focus/active/primary/prompts/caret), **secondary cyan `#3df5e0`** (positive/ready: SAVED ✓, favorited, online), `error #ff4d4d`, `border rgba(230,235,227,0.08)` (→ `borderAccent` on focus). Use the `glow()` helper for neon on yellow/cyan. **No warm browns/oranges** — those were the OLD theme; all migrated.
+- **Type:** JetBrains Mono for labels/data/numbers/timestamps/prompts/section-headers/track-meta. Manrope (sans) for large titles + long body (lyrics).
+- **Motifs:** prompt headers `vibeflow ~/discover $` + blinking yellow block caret (`ConsoleHeader`); section headers `[ TRENDING ]────[12]` (`SectionHeader`); tab bar mono `[discover] [search] [library] [settings]`; MiniPlayer = console status line `▶ TITLE · ARTIST · 1:23/4:03`; mood chips as `#tags`; bracketed buttons `[ play ]`; small radius **4–6px, no 999 pills**; optional very-low-opacity CRT scanline overlay (`ScanlineOverlay`, built, not yet mounted).
+- **⛔ NO spinning vinyl / rotating disc anywhere.** It was explicitly removed. Player artwork = square cover in a "terminal window" frame (`TerminalArtwork`). Don't reintroduce rotation.
+- Reuse `components/ui/` primitives (Caret, ConsoleHeader, SectionHeader, Tag, ConsoleButton, StatusLine, ScanlineOverlay) instead of duplicating inline styles.
+
+### 3. 🏗️ Architecture conventions (keep these)
+- Tokens in `constants/theme.ts` (`COLORS`, `FONTS`, `SPACING`, `glow()`). Also mirrored in `tailwind.config.js`.
+- UI separated from logic: screens are thin, composing `hooks/` + `components/ui/` + feature components. Logic lives in stores + hooks.
+- `components/player/` holds the split player parts; `app/player.tsx` is a lean composition (~193 lines).
+- Note: imports use **relative paths** (`../../constants/theme`), NOT the `@/` alias the design-spec snippets showed — the `@/` alias is not configured. Match the existing relative-import style.
+
+### 4. ✅ Verification model (no test runner)
+- No jest. Per change: `npx tsc --noEmit` must PASS.
+- Grep for legacy hex when reskinning: `grep -rn "#ff5c2e\|#f5efe3\|#0e0c0a\|#a08a78\|#5a4d42\|#e8b67a" app components` → expect 0.
+- **Native + visual + visualizer reactivity are ONLY verifiable on a real device build** (`npx expo run:android`). The user runs device tests himself to save tokens. **Never claim "it works" on device without his confirmation.**
+
+### 5. 🔨 Build / deploy notes
+- **Do NOT use `expo build`.** Use `npx expo run:android` (local Gradle build). Android-only sideload; iOS is a no-op.
+- Known build setup (from prior sessions): Kotlin 2.1.20, compileSdk 36, targetSdk 35, NDK 27.1. RNTP had a Kotlin-strictness patch in `node_modules` (`MusicModule.kt`, `originalItem!!`) — `patch-package` + `postinstall` are wired so it survives `npm install`. If a fresh `expo prebuild` is run, re-verify the patch applied.
+- Pixel 10 via **wireless ADB** (`adb pair` then `adb connect IP:port`); the port rotates, so ask the user for the current one each session.
+
+### 6. 📌 Plan 2 is the real remaining feature work
+Native Android FFT visualizer (`android.media.audiofx.Visualizer` on session 0, Kotlin Expo module + `useAudioSpectrum` hook → Skia bars). Requires `RECORD_AUDIO` permission (explain to user it's for the visualizer, not recording). Replaces the `VisualizerView.tsx` placeholder. Full design in the spec §6–§8. Author it with `superpowers:writing-plans` before implementing.
+
+---
+
 **Goal:** Re-skin the entire VibeFlow app to a futuristic programmer-console / CMD aesthetic (neon-yellow + cyan on dark), and refactor the codebase into clean modular units (UI separated from logic) — with zero change to playback/download behavior.
 
 **Architecture:** Centralize design tokens in `constants/theme.ts` + `tailwind.config.js`. Build reusable console primitives in `components/ui/`. Extract stateful logic out of `app/player.tsx` into `hooks/` (moved verbatim — no behavior change). Split the 772-line player into focused `components/player/` parts. Re-skin every screen using the primitives. The audio visualizer is a placeholder slot here; the real native FFT engine is **Plan 2**.
