@@ -62,11 +62,13 @@ Sin anuncios, sin cuentas, sin vueltas. Ponés un video de YouTube y suena.
 | **Buscar canciones** | Search integrado con resultados de YouTube |
 | **Descargas offline** | Descargá audios para escuchar sin conexión |
 | **Playlists** | Creá y administrá tus propias playlists |
+| **Importar playlists** | Importá playlists de Spotify/YouTube desde CSV, JSON o TXT |
 | **Cola de reproducción** | Añadí canciones a la cola con un swipe |
 | **Favoritos** | Marcá tracks como favoritos |
 | **Historial** | Todo lo que escuchaste, siempre disponible |
 | **Letras sincronizadas** | LRC letras vía LRCLib |
 | **Terminal Artwork** | Arte ASCII animado mientras suena un tema |
+| **3 Temas visuales** | Elegí entre Neon, Frost e Industrial |
 | **Mini Player** | Control compacto desde cualquier pantalla |
 | **Modo offline** | Tus descargas siempre disponibles |
 | **Compartir** | Compartí canciones descargadas desde la app |
@@ -81,10 +83,12 @@ Navegación    → expo-router (file-based routing)
 Reproductor   → react-native-track-player v4
 Animaciones   → Reanimated + Moti
 Gestos        → react-native-gesture-handler v2
-Estado        → Zustand
+Estado        → Zustand (persist con AsyncStorage)
 DB local      → expo-sqlite
-Estilos       → TailwindCSS (NativeWind) + theme custom
-Fuentes       → Manrope · JetBrains Mono · Fraunces
+Sistema arch. → expo-file-system/legacy
+Picker docs   → expo-document-picker
+Estilos       → TailwindCSS (NativeWind) + theme custom (3 temas)
+Fuentes       → Manrope · JetBrains Mono · Fraunces · Inter · IBM Plex Mono
 ```
 
 ### Servicios de YouTube
@@ -96,6 +100,26 @@ Fuentes       → Manrope · JetBrains Mono · Fraunces
 | 3 | API key backup | `services/youtubeRest.ts` |
 
 Sistema de 3 capas: si la librería falla por cambios en YouTube, el REST API directo lo resuelve. Si la API key principal falla, tiene una de backup. Sin depender de JS evaluator (no existe en React Native).
+
+### Importación de Playlists
+
+| Formato | Parser | Archivo |
+|---------|--------|---------|
+| CSV | Parser propio (sin dependencias) | `services/csvParser.ts` |
+| JSON | Búsqueda recursiva de arrays | `services/jsonParser.ts` |
+| TXT | Regex "Artista - Título" | `services/txtParser.ts` |
+
+Los 3 se unifican en `services/playlistImporter.ts` que detecta formato, parsea, busca cada track en YouTube con batching (5 en paralelo), asigna confianza por word overlap, y presenta resultados en `ImportReviewModal` para revisión manual de tracks dudosos (&lt;70%).
+
+### Temas Visuales
+
+| Tema | Descripción | Fuentes |
+|------|-------------|---------|
+| Neon | Oscuro con acento amarillo neón (default) | JetBrains Mono + Manrope |
+| Frost | Claro con acento azul | JetBrains Mono + Manrope |
+| Industrial | Oscuro brutalista con acento naranja | IBM Plex Mono + Inter |
+
+Persistido en AsyncStorage via Zustand. Cambio instantáneo sin reinicio. Selector inline en Settings.
 
 <br />
 
@@ -125,22 +149,34 @@ app/
 ├── (tabs)/          → Discover, Search, Library, Favorites, History, Downloads, Settings
 ├── player.tsx        → Full-screen player (modal)
 ├── playlist/[id].tsx → Playlist detail
-├── _layout.tsx       → Root layout (TrackPlayer init, gesture handler)
+├── _layout.tsx       → Root layout (TrackPlayer init, gesture handler, font loading)
 
 components/
 ├── TrackRow.tsx          → Track list item (swipe actions)
 ├── TrackActionsModal.tsx → Bottom sheet (long-press menu)
+├── ImportTrigger.tsx     → File picker + import modal wrapper
+├── ImportReviewModal.tsx → 6-phase import flow modal
+├── ThemeSelector.tsx     → Inline theme dropdown
 ├── player/
-│   ├── TerminalArtwork.tsx → ASCII art visualization
+│   ├── TerminalArtwork.tsx → Framed square artwork
 │   ├── LyricsView.tsx      → Synchronized lyrics
 │   ├── PlayerControls.tsx  → Play/pause/next/prev
 │   ├── ProgressScrub.tsx   → Seek bar
-│   └── ...
+│   ├── VisualizerView.tsx  → Spectrum bars (placeholder)
+│   └── QueuePanel.tsx      → Queue manager
+├── ui/                   → Console primitives
+│   ├── ConsoleHeader.tsx  → Prompt-style header
+│   ├── SectionHeader.tsx  → [ LABEL ]──[NN]
+│   ├── ConsoleButton.tsx  → Bracketed buttons
+│   ├── Caret.tsx          → Blinking cursor
+│   ├── Tag.tsx            → #labels
+│   ├── StatusLine.tsx     → Mono status row
+│   └── ScanlineOverlay.tsx → CRT texture
 
-stores/ → Zustand (player, library, downloads)
-services/ → SQLite, YouTube API, Audio streaming
-
-constants/ → Theme colors, fonts, spacing
+stores/ → Zustand (player, library, downloads, theme)
+services/ → SQLite, YouTube API (youtube.ts + youtubeRest.ts), parsers (csv/json/txt), playlistImporter
+constants/ → Theme colors, fonts, spacing (reactive useTheme() hook)
+hooks/ → useTrackDownload (extracted), useLyrics (extracted)
 ```
 
 ### Flujo de reproducción

@@ -148,15 +148,16 @@ Cada uno requiere headers específicos (`User-Agent`, `X-YouTube-Client-Name`, `
 
 ## UI/UX Patterns
 
-### Estilos globales
-- Fondo: `#0e0c0a`
-- Texto primario (cream): `#f5efe3`
-- Texto secundario: `#a08a78`
-- Texto muted: `#5a4d42`
-- Acento (naranja): `#ff5c2e`
-- Ámbar: `#e8b67a`
-- Fuentes: Manrope (texto), JetBrains Mono (mono/etiquetas)
-- Bordes: `rgba(245,239,227, 0.06)` sutil
+### Estilos globales (Neon theme, default)
+- Fondo: `#0b0c0b`
+- Texto primario: `#e6ebe3`
+- Texto secundario: `#6f7a6c`
+- Texto muted: `#3a423a`
+- Acento (neon yellow): `#e5ff3a`
+- Secundario (cyan): `#3df5e0`
+- Bordes: `rgba(230,235,227,0.08)` sutil
+- Fuentes: Manrope (display), JetBrains Mono (mono/etiquetas), Fraunces (títulos decorativos)
+- Layout: prompts `vibeflow ~/path $ ` + blinking caret, headers `[ SECTION ]──[NN]`, buttons `[ label ]`, radius 4-6px (no pills)
 
 ### TrackRow
 - Componente reutilizable en `components/TrackRow.tsx`
@@ -170,7 +171,82 @@ Cada uno requiere headers específicos (`User-Agent`, `X-YouTube-Client-Name`, `
 
 ---
 
-## Bugs Conocidos y Fixes
+## Theme System (3 temas switchables)
+
+### Arquitectura
+```
+constants/themes.ts → definiciones de 3 temas (neon/frost/industrial)
+stores/themeStore.ts → Zustand + persist (AsyncStorage) guarda themeName
+constants/theme.ts → exporta useTheme() hook reactivo, exporta COLORS/FONTS estáticos (default neon)
+```
+
+### Hook reactivo
+```ts
+// En cualquier componente:
+const { colors, fonts } = useTheme();
+// colors.bg, colors.text, colors.accent, fonts.mono, fonts.sans, etc.
+```
+
+### Temas
+| Tema | bg | accent | fonts |
+|------|----|--------|-------|
+| **neon** | `#0b0c0b` | `#e5ff3a` (amarillo) | JetBrains Mono + Manrope |
+| **frost** | `#f5f0eb` (claro) | `#00bfff` (azul) | JetBrains Mono + Manrope |
+| **industrial** | `#1c1c1c` | `#ff6b35` (naranja) | IBM Plex Mono + Inter |
+
+### Migración
+- 27+ archivos migrados de `import { COLORS, FONTS }` → `const { colors, fonts } = useTheme()`
+- `ThemeSelector` en Settings: inline dropdown con 3 opciones, radio indicators, color swatch
+- Cambio instantáneo sin reinicio (Zustand reactivo)
+- Fonts de industrial (Inter, IBM Plex Mono) cargados en splash junto con los demás
+- **TrackRow useCallback fix**: colors/fonts en dependency arrays para evitar closures stale al cambiar tema
+
+---
+
+## Playlist Importer
+
+### Pipeline
+```
+expo-document-picker → file URI → copyAsync a cacheDirectory (permiso URI)
+  → readAndParseFile() → detecta formato (csv|json|txt) → parsea
+  → [(artist, title)] → searchAndMatch() con batching 5 en paralelo
+  → [{original, match, confidence}] → ImportReviewModal (6 fases)
+  → createPlaylist() + addTrackToPlaylist()
+```
+
+### Archivos
+| Archivo | Rol |
+|---------|-----|
+| `services/playlistImporter.ts` | Orquestador: detectFormat, parseFile, searchAndMatch, computeConfidence, matchedTracksToTracks, readAndParseFile |
+| `services/csvParser.ts` | CSV sin dependencias: split por newline, headers case-insensitive, soporta quotes, mapea columnas Title/Artist/track_name/etc |
+| `services/jsonParser.ts` | JSON: recursive search de arrays con objetos que tengan keys title/artist |
+| `services/txtParser.ts` | TXT: regex `^(.+)\s*[-–—]\s*(.+)$`, ignora URLs de YouTube, salta líneas vacías |
+| `components/ImportReviewModal.tsx` | Modal de 6 fases (reading→searching→review→saving→done→error) con barra de progreso, cancelación via AbortController, pantalla de error con reintentar/cerrar |
+| `components/ImportTrigger.tsx` | Componente reutilizable: DocumentPicker + copyAsync + ImportReviewModal. Variante compact (Library) y full-width (Settings) |
+
+### Confidence scoring
+- normalize(): lowercase, remove punctuation, collapse whitespace
+- removeNoise(): quita "(Official Video)", "(Lyrics)", "| ...", "vevo", etc.
+- wordOverlap(): Set-based word intersection/union
+- computeConfidence(): 
+  - title exact match → 98
+  - YT title contains original title → 95
+  - word overlap ≥70% → 70 + overlap×25 + artistMatch bonus
+  - <70% → overlap%
+  - no results → 0
+
+### Manejo de errores
+- `FileError` con tipos: read_error, parse_error, no_tracks, unsupported_format
+- ImportReviewModal muestra título + mensaje + botones reintentar/cerrar
+- AbortController cancela búsquedas entre batches (checked cada 5 tracks)
+- `cancelled` flag + `signal.aborted` check en search loop
+
+### URI Permission Fix
+Android revoca permisos de content:// URIs cuando el Activity pierde foco. Solución: copiar el archivo a `FileSystem.cacheDirectory + 'import/'` inmediatamente después de `DocumentPicker.getDocumentAsync()`, antes de cualquier operación async que pueda causar un re-render o cambio de Activity.
+
+---
+
+## UI/UX Patterns
 
 ### Bug: Click en trending no reproduce la canción correcta
 **Causa:** `PlaybackActiveTrackChanged` matcheaba por `event.index === 0`, pero
@@ -202,6 +278,14 @@ incluyendo `Accept: '*/*'`.
 ## Build / Deploy
 
 - **No usar `expo build`.** Usar `npx expo run:android` (build local con Android Studio/Gradle).
+- **Release APK**:
+  ```sh
+  npx expo prebuild --no-install    # solo si hay cambios en Gradle
+  cd android && ./gradlew app:createBundleReleaseJsAndAssets app:assembleRelease
+  adb install -r android/app/build/outputs/apk/release/app-release.apk
+  cp android/app/build/outputs/apk/release/app-release.apk ~/Projects/APKs/
+  ```
 - El proyecto usa config-plugin para track player (expo-build-properties).
-- SDK 52+ (Expo).
+- SDK 56 (Expo), RN 0.85.3.
+- Las builds release se copian automáticamente a `~/Projects/APKs/` con timestamp.
 - Para probar descargas offline: build APK, instalar en dispositivo, descargar, poner en modo avión.

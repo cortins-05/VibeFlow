@@ -66,6 +66,9 @@ cp android/app/build/outputs/apk/release/app-release.apk ~/Projects/APKs/
 - **Share in downloads**: uses `expo-sharing` (`Sharing.shareAsync`) with mimeType `audio/mpeg`. Do NOT use RN `Share.share({url})` — it fails on Android with "cannot send empty message".
 - **Theme**: COLORS/FONTS from `constants/theme`. Uses Manrope, JetBrains Mono, Fraunces fonts.
 - **Gestures**: Swipeable from react-native-gesture-handler imported as `import Swipeable from 'react-native-gesture-handler/Swipeable'`. Ref for imperative close: `useRef<any>(null)`.
+- **useTheme()**: All components get colors/fonts via `const { colors, fonts } = useTheme()` from `constants/theme`. Never import COLORS/FONTS directly (static fallback only). Theme changes instantly without restart.
+- **Playlist import**: `ImportTrigger` wraps `DocumentPicker` → `FileSystem.copyAsync` to cache (URI permission fix) → `ImportReviewModal` (6-phase: reading→searching→review→saving→done→error). Uses `readAndParseFile()` for format detection, `searchAndMatch()` with batching + confidence scoring.
+- **expo-file-system/legacy**: Always import from `expo-file-system/legacy` (not `expo-file-system`). The modern API doesn't expose `cacheDirectory`, `readAsStringAsync`, `copyAsync`, `makeDirectoryAsync`, `DownloadResumable`.
 
 ## Recent Changes (May 28 2026)
 1. **3-layer YouTube fallback**: youtubei.js → REST API → backup API key
@@ -77,6 +80,14 @@ cp android/app/build/outputs/apk/release/app-release.apk ~/Projects/APKs/
 7. Swipe left → remove from playlist (only on playlist screen, no confirmation dialog)
 8. TrackActionsModal enlarged: bigger padding, fonts, hit areas
 9. Responsive layout fix: bottom safe area insets for devices with navigation bar
+10. **Theme selector**: 3 switchable themes (neon/frost/industrial) via `stores/themeStore.ts` (Zustand + AsyncStorage) + reactive `useTheme()` hook in `constants/theme.ts`. `ThemeSelector` inline dropdown in Settings. All 27+ files migrated from static `COLORS`/`FONTS` to `useTheme()`.
+11. **Playlist importer**: import Spotify/YouTube playlists from CSV/JSON/TXT files. Parsers in `services/csvParser.ts`, `jsonParser.ts`, `txtParser.ts`. `searchAndMatch()` with batching (5 at a time), confidence scoring (word overlap + containment), AbortSignal support. `readAndParseFile()` with typed `FileError`.
+12. **ImportReviewModal**: 6-phase blocking modal (reading → searching → review → saving → done → error) with progress bar, cancellation (AbortController), error screen with retry/close. `components/ImportReviewModal.tsx`.
+13. **ImportTrigger**: reusable component wrapping DocumentPicker + file copy + ImportReviewModal. Compact variant in Library header, full-width in Settings Import section.
+14. **Settings simplified**: removed Audio (Equalizer/Quality) and Storage (Cache) sections. Only Appearance → Import → About.
+15. **URI permission fix**: copy imported file to `FileSystem.cacheDirectory` immediately after picking to bypass Android temporary content:// URI permission expiry.
+16. **expo-file-system/legacy**: migrated from `expo-file-system` to `expo-file-system/legacy` for SDK 56 API compatibility (`cacheDirectory`, `readAsStringAsync`, `copyAsync`).
+17. **TrackRow useCallback fix**: added `colors`/`fonts` to dependency arrays so swipe actions (add to queue, remove from playlist) reflect theme changes without stale closures.
 
 ## User Preferences
 - Spanish speaker, fast iterations preferred

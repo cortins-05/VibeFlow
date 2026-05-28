@@ -1,5 +1,10 @@
 # Plan 2: FFT Visualizer + Queue Features + Share + Fixes
 
+> **STATUS: 🟡 PARTIALLY IMPLEMENTED — some tasks applied inline during import/theme work, some deferred.**
+> - **Done (not as this plan):** Share via expo-sharing in downloads (fix: `Sharing.shareAsync` not RN `Share`), circular queue skip handlers in player, TrackActionsModal with add-to-queue everywhere, remove visualizer tap toggle (→ artwork/lyrics direct toggle), swipe actions on TrackRow.
+> - **NOT done:** Native FFT visualizer (Kotlin Expo module never built), queue manager panel (QueuePanel exists but not wired), `moveInQueue`/`removeFromQueue` actions in playerStore.
+> - FFT visualizer is no longer planned (user chose simple audio-reactive bars approach; visualizer mode removed entirely). Queue panel and store actions remain TODO if needed.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add native Android FFT visualizer, circular queue, queue manager panel, add-to-queue everywhere, share downloaded tracks, remove library duplication.
