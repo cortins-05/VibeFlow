@@ -19,7 +19,6 @@ import ImportReviewModal from '../../components/ImportReviewModal';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { useDownloadStore } from '../../stores/downloadStore';
 import { useTheme, glow } from '../../constants/theme';
-import { importPlaylistFromFile, type ParsedTrack } from '../../services/playlistImporter';
 
 export default function LibraryScreen() {
   const { colors, fonts } = useTheme();
@@ -28,7 +27,7 @@ export default function LibraryScreen() {
   const { downloads, loadDownloads } = useDownloadStore();
   const [showCreate, setShowCreate] = useState(false);
   const [playlistName, setPlaylistName] = useState('');
-  const [importTracks, setImportTracks] = useState<ParsedTrack[]>([]);
+  const [importUri, setImportUri] = useState('');
   const [importName, setImportName] = useState('');
   const [showImport, setShowImport] = useState(false);
 
@@ -49,14 +48,14 @@ export default function LibraryScreen() {
       });
       if (result.canceled || !result.assets?.[0]) return;
 
-      const file = await importPlaylistFromFile(result.assets[0].uri);
-      if (!file || file.tracks.length === 0) return;
+      const uri = result.assets[0].uri;
+      const name = uri.split('/').pop()?.replace(/\.[^.]+$/, '') || 'Imported Playlist';
 
-      setImportName(file.name);
-      setImportTracks(file.tracks);
+      setImportUri(uri);
+      setImportName(name);
       setShowImport(true);
     } catch {
-      // silent fail
+      // silent fail — picker handles its own errors
     }
   }
 
@@ -284,8 +283,8 @@ export default function LibraryScreen() {
       </Modal>
       <ImportReviewModal
         visible={showImport}
-        playlistName={importName}
-        tracks={importTracks}
+        fileUri={importUri}
+        defaultName={importName}
         onClose={() => setShowImport(false)}
       />
     </View>

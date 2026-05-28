@@ -16,6 +16,22 @@ export interface MatchedTrack {
   confidence: number;
 }
 
+export interface ImportFileResult {
+  name: string;
+  tracks: ParsedTrack[];
+}
+
+export type FileErrorKind = 'read_error' | 'parse_error' | 'no_tracks' | 'unsupported_format';
+
+export class FileError extends Error {
+  kind: FileErrorKind;
+  constructor(kind: FileErrorKind, message: string) {
+    super(message);
+    this.name = 'FileError';
+    this.kind = kind;
+  }
+}
+
 type FileFormat = 'csv' | 'json' | 'txt';
 
 function detectFormat(uri: string, text: string): FileFormat {
@@ -24,7 +40,6 @@ function detectFormat(uri: string, text: string): FileFormat {
   if (ext === 'json') return 'json';
   if (ext === 'txt') return 'txt';
 
-  // Content sniffing fallback
   const trimmed = text.trim();
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) return 'json';
   if (trimmed.includes(',')) return 'csv';
@@ -81,17 +96,13 @@ function computeConfidence(original: ParsedTrack, video: VideoInfo): number {
   const normOrigTitle = normalize(original.title);
   const normArtist = normalize(video.artist);
 
-  // Exact title match
   if (normTitle === normOrigTitle) return 98;
 
-  // YT title contains original title
   if (normTitle.includes(normOrigTitle)) return 95;
 
-  // Artist appears in YT title or channel name
   const normOrigArtist = normalize(original.artist);
   const artistMatch = normTitle.includes(normOrigArtist) || normArtist.includes(normOrigArtist);
 
-  // Word overlap
   const overlap = wordOverlap(normTitle, normOrigTitle);
   if (overlap >= 0.7) {
     return Math.round(70 + overlap * 25 + (artistMatch ? 5 : 0));
@@ -101,16 +112,20 @@ function computeConfidence(original: ParsedTrack, video: VideoInfo): number {
 
 export async function searchAndMatch(
   tracks: ParsedTrack[],
+  signal?: AbortSignal,
   onProgress?: (done: number, total: number) => void
 ): Promise<MatchedTrack[]> {
   const results: MatchedTrack[] = [];
   const BATCH_SIZE = 5;
 
   for (let i = 0; i < tracks.length; i += BATCH_SIZE) {
+    if (signal?.aborted) {
+      throw new DOMException('Import cancelled', 'AbortError');
+    }
+
     const batch = tracks.slice(i, i + BATCH_SIZE);
     const batchResults = await Promise.all(
       batch.map(async (track) => {
-        // Try "Artist - Title" first
         const query1 = `${track.artist} - ${track.title}`;
         const results1 = await searchYouTube(query1);
         if (results1.length > 0) {
@@ -121,7 +136,6 @@ export async function searchAndMatch(
           }
         }
 
-        // Fallback: search just the title
         const results2 = await searchYouTube(track.title);
         if (results2.length > 0) {
           const best = results2[0];
@@ -134,9 +148,7 @@ export async function searchAndMatch(
     );
     results.push(...batchResults);
 
-    if (onProgress) {
-      onProgress(Math.min(i + BATCH_SIZE, tracks.length), tracks.length);
-    }
+    onProgress?.(Math.min(i + BATCH_SIZE, tracks.length), tracks.length);
   }
 
   return results;
@@ -155,18 +167,30 @@ export function matchedTracksToTracks(matched: MatchedTrack[]): Track[] {
     }));
 }
 
-export async function importPlaylistFromFile(
-  uri: string
-): Promise<{ name: string; tracks: ParsedTrack[] } | null> {
-  try {
-    const text = await FileSystem.readAsStringAsync(uri);
-    const format = detectFormat(uri, text);
-    const tracks = parseFile(text, format);
-    if (tracks.length === 0) return null;
+export function detectTracksFromUri(uri: string, name?: string): string {
+  return name || uri.split('/').pop()?.replace(/\.[^.]+$/, '') || 'Imported Playlist';
+}
 
-    const name = uri.split('/').pop()?.replace(/\.[^.]+$/, '') || 'Imported Playlist';
-    return { name, tracks };
+export async function readAndParseFile(uri: string): Promise<ImportFileResult> {
+  let text: string;
+  try {
+    text = await FileSystem.readAsStringAsync(uri);
   } catch {
-    return null;
+    throw new FileError('read_error', 'No se pudo leer el archivo. Asegúrate de que el archivo exista y sea accesible.');
   }
+
+  const format = detectFormat(uri, text);
+  let tracks: ParsedTrack[];
+  try {
+    tracks = parseFile(text, format);
+  } catch {
+    throw new FileError('parse_error', 'No se pudo interpretar el formato del archivo. Asegúrate de que sea CSV, JSON o TXT válido.');
+  }
+
+  if (tracks.length === 0) {
+    throw new FileError('no_tracks', 'No se encontraron canciones en el archivo. Verifica que contenga columnas Title/Artist o el formato "Artista - Título".');
+  }
+
+  const name = detectTracksFromUri(uri);
+  return { name, tracks };
 }

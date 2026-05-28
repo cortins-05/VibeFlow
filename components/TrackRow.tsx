@@ -80,7 +80,7 @@ const TrackRow = memo(function TrackRow({
         </Animated.View>
       );
     },
-    [onSwipeRight],
+    [onSwipeRight, colors, fonts],
   );
 
   const renderRightActions = useCallback(
@@ -116,7 +116,7 @@ const TrackRow = memo(function TrackRow({
         </Animated.View>
       );
     },
-    [onSwipeLeft],
+    [onSwipeLeft, fonts],
   );
 
   const row = (
