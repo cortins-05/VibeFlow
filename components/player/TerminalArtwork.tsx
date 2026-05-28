@@ -2,7 +2,7 @@ import { View, Text, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { COLORS, FONTS } from '../../constants/theme';
 
-export default function TerminalArtwork({ uri, size, onPress }: { uri?: string; size: number; onPress: () => void }) {
+export default function TerminalArtwork({ uri, size, onPress }: { uri?: string; size: number; onPress?: () => void }) {
   return (
     <Pressable onPress={onPress} style={{ width: size, alignSelf: 'center' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4, marginBottom: 4 }}>
@@ -22,9 +22,6 @@ export default function TerminalArtwork({ uri, size, onPress }: { uri?: string; 
       >
         <Image source={{ uri }} style={{ width: size, height: size }} contentFit="cover" />
       </View>
-      <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 4, textAlign: 'center' }}>
-        tap → visualizer
-      </Text>
     </Pressable>
   );
 }

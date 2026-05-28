@@ -13,7 +13,7 @@ import { COLORS, FONTS } from '../../constants/theme';
 export default function HistoryScreen() {
   const router = useRouter();
   const { history } = useLibraryStore();
-  const { playQueue, currentTrack } = usePlayerStore();
+  const { playQueue, currentTrack, addToQueue } = usePlayerStore();
   const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
 
   return (
@@ -81,6 +81,16 @@ export default function HistoryScreen() {
                   })),
                   i,
                 )
+              }
+              onSwipeRight={() =>
+                addToQueue({
+                  id: h.video_id,
+                  videoId: h.video_id,
+                  title: h.title,
+                  artist: h.artist,
+                  artwork: h.artwork ?? undefined,
+                  duration: h.duration,
+                })
               }
             />
           ))}

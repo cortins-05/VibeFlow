@@ -38,7 +38,7 @@ export default function HomeScreen() {
   const history = useLibraryStore((s) => s.history);
   const favorites = useLibraryStore((s) => s.favorites);
   const toggleFavorite = useLibraryStore((s) => s.toggleFavorite);
-  const { currentTrack, playQueue } = usePlayerStore();
+  const { currentTrack, playQueue, addToQueue } = usePlayerStore();
   const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
 
   const loadTrending = useCallback(async () => {
@@ -172,6 +172,16 @@ export default function HomeScreen() {
                     )
                   }
                   isActive={currentTrack?.videoId === h.video_id}
+                  onSwipeRight={() =>
+                    addToQueue({
+                      id: h.video_id,
+                      videoId: h.video_id,
+                      title: h.title,
+                      artist: h.artist,
+                      artwork: h.artwork ?? undefined,
+                      duration: h.duration,
+                    })
+                  }
                 />
               ))}
             </View>
@@ -243,6 +253,16 @@ export default function HomeScreen() {
                     })
                   }
                   onPress={() => playQueue(trending.map(toTrack), i)}
+                  onSwipeRight={() =>
+                    addToQueue({
+                      id: video.videoId,
+                      videoId: video.videoId,
+                      title: video.title,
+                      artist: video.artist,
+                      artwork: video.artwork,
+                      duration: video.duration,
+                    })
+                  }
                 />
               ))}
           </View>

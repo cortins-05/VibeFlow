@@ -54,20 +54,20 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
             backgroundColor: COLORS.surface,
             borderTopLeftRadius: 6,
             borderTopRightRadius: 6,
-            paddingTop: 20,
-            paddingBottom: 40,
+            paddingTop: 28,
+            paddingBottom: 48,
             borderWidth: 1,
             borderColor: COLORS.border,
             borderBottomWidth: 0,
-            maxHeight: '70%',
+            maxHeight: '85%',
           }}
         >
-          <View style={{ paddingHorizontal: 20, paddingBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text style={{ flex: 1, fontFamily: FONTS.mono, fontSize: 10, color: COLORS.accent, letterSpacing: 1 }} numberOfLines={1}>
+          <View style={{ paddingHorizontal: 20, paddingBottom: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ flex: 1, fontFamily: FONTS.mono, fontSize: 12, color: COLORS.accent, letterSpacing: 1 }} numberOfLines={1}>
               [ {t.title} ]
             </Text>
-            <Pressable onPress={onClose} hitSlop={8}>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim }}>[ close ]</Text>
+            <Pressable onPress={onClose} hitSlop={12}>
+              <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.textDim }}>[ close ]</Text>
             </Pressable>
           </View>
 
@@ -99,40 +99,40 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
               </>
             ) : (
               <>
-                <Pressable onPress={() => setShowPlaylists(false)} style={{ marginBottom: 12 }}>
-                  <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim }}>{'< back'}</Text>
+                <Pressable onPress={() => setShowPlaylists(false)} style={{ marginBottom: 16 }}>
+                  <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.textDim }}>{'< back'}</Text>
                 </Pressable>
 
                 {!showCreate ? (
                   <>
-                    <Pressable
-                      onPress={() => setShowCreate(true)}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        paddingVertical: 14,
-                        borderBottomWidth: 1,
-                        borderBottomColor: COLORS.border,
-                      }}
-                    >
-                      <View
+                      <Pressable
+                        onPress={() => setShowCreate(true)}
                         style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: 4,
-                          backgroundColor: 'rgba(229,255,58,0.08)',
+                          flexDirection: 'row',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          borderWidth: 1,
-                          borderColor: COLORS.borderAccent,
+                          paddingVertical: 16,
+                          borderBottomWidth: 1,
+                          borderBottomColor: COLORS.border,
                         }}
                       >
-                        <Text style={{ color: COLORS.accent, fontSize: 18 }}>+</Text>
-                      </View>
-                      <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.accent, marginLeft: 14 }}>
-                        [ new playlist ]
-                      </Text>
-                    </Pressable>
+                        <View
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 4,
+                            backgroundColor: 'rgba(229,255,58,0.08)',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderWidth: 1,
+                            borderColor: COLORS.borderAccent,
+                          }}
+                        >
+                          <Text style={{ color: COLORS.accent, fontSize: 22 }}>+</Text>
+                        </View>
+                        <Text style={{ fontFamily: FONTS.mono, fontSize: 13, color: COLORS.accent, marginLeft: 16 }}>
+                          [ new playlist ]
+                        </Text>
+                      </Pressable>
 
                     {playlists.map((pl) => (
                       <Pressable
@@ -141,25 +141,25 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
                         style={{
                           flexDirection: 'row',
                           alignItems: 'center',
-                          paddingVertical: 14,
+                          paddingVertical: 16,
                           borderBottomWidth: 1,
                           borderBottomColor: COLORS.border,
                         }}
                       >
                         <View
                           style={{
-                            width: 36,
-                            height: 36,
+                            width: 40,
+                            height: 40,
                             borderRadius: 4,
                             backgroundColor: COLORS.bg,
                             alignItems: 'center',
                             justifyContent: 'center',
                           }}
                         >
-                          <ListMusic color={COLORS.secondary} size={16} />
+                          <ListMusic color={COLORS.secondary} size={20} />
                         </View>
                         <Text
-                          style={{ flex: 1, fontFamily: FONTS.sans, fontSize: 14, color: COLORS.text, marginLeft: 14 }}
+                          style={{ flex: 1, fontFamily: FONTS.sans, fontSize: 16, color: COLORS.text, marginLeft: 16 }}
                           numberOfLines={1}
                         >
                           {pl.name}
@@ -259,13 +259,13 @@ function ActionOption({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 14,
+        paddingVertical: 18,
         borderBottomWidth: 1,
         borderBottomColor: COLORS.border,
       }}
     >
       {icon}
-      <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color, marginLeft: 14, letterSpacing: 0.5 }}>
+      <Text style={{ fontFamily: FONTS.mono, fontSize: 14, color, marginLeft: 16, letterSpacing: 0.5 }}>
         [ {label} ]
       </Text>
     </Pressable>

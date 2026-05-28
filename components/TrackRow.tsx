@@ -1,8 +1,9 @@
-import { memo } from 'react';
-import { View, Text, TouchableOpacity, Pressable } from 'react-native';
+import { memo, useRef, useCallback } from 'react';
+import { View, Text, TouchableOpacity, Pressable, Animated } from 'react-native';
 import { Image } from 'expo-image';
-import { Heart, MoreVertical, Pause } from 'lucide-react-native';
+import { Heart, MoreVertical, Pause, ListMusic, Trash2 } from 'lucide-react-native';
 import { MotiView } from 'moti';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import type { VideoInfo } from '../services/youtube';
 import { COLORS, FONTS } from '../constants/theme';
 
@@ -16,7 +17,11 @@ interface Props {
   showFavorite?: boolean;
   isFavorited?: boolean;
   onFavoriteToggle?: () => void;
+  onSwipeRight?: () => void;
+  onSwipeLeft?: () => void;
 }
+
+const ACTION_WIDTH = 100;
 
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -34,15 +39,86 @@ const TrackRow = memo(function TrackRow({
   showFavorite,
   isFavorited,
   onFavoriteToggle,
+  onSwipeRight,
+  onSwipeLeft,
 }: Props) {
   const numeral = String((index ?? 0) + 1).padStart(2, '0');
+  const swipeableRef = useRef<any>(null);
+  const hasSwipe = !!onSwipeRight || !!onSwipeLeft;
 
-  return (
-    <MotiView
-      from={{ opacity: 0, translateX: -8 }}
-      animate={{ opacity: 1, translateX: 0 }}
-      transition={{ type: 'timing', duration: 280, delay: (index ?? 0) * 28 }}
-    >
+  const renderLeftActions = useCallback(
+    (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+      if (!onSwipeRight) return null;
+      const translateX = progress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [-ACTION_WIDTH, 0],
+      });
+      return (
+        <Animated.View style={{ transform: [{ translateX }] }}>
+          <TouchableOpacity
+            onPress={() => {
+              onSwipeRight();
+              swipeableRef.current?.close();
+            }}
+            activeOpacity={0.85}
+            style={{
+              backgroundColor: COLORS.accent,
+              width: ACTION_WIDTH,
+              height: '100%',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <ListMusic color={COLORS.bg} size={18} />
+            <Text
+              style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.bg, marginTop: 4 }}
+            >
+              add to queue
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+      );
+    },
+    [onSwipeRight],
+  );
+
+  const renderRightActions = useCallback(
+    (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+      if (!onSwipeLeft) return null;
+      const translateX = progress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [ACTION_WIDTH, 0],
+      });
+      return (
+        <Animated.View style={{ transform: [{ translateX }] }}>
+          <TouchableOpacity
+            onPress={() => {
+              onSwipeLeft();
+              swipeableRef.current?.close();
+            }}
+            activeOpacity={0.85}
+            style={{
+              backgroundColor: '#e74c3c',
+              width: ACTION_WIDTH,
+              height: '100%',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Trash2 color="#fff" size={18} />
+            <Text
+              style={{ fontFamily: FONTS.mono, fontSize: 10, color: '#fff', marginTop: 4 }}
+            >
+              remove
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+      );
+    },
+    [onSwipeLeft],
+  );
+
+  const row = (
       <TouchableOpacity
         onPress={onPress}
         onLongPress={onLongPress}
@@ -156,6 +232,27 @@ const TrackRow = memo(function TrackRow({
           </TouchableOpacity>
         )}
       </TouchableOpacity>
+  );
+
+  return (
+    <MotiView
+      from={{ opacity: 0, translateX: -8 }}
+      animate={{ opacity: 1, translateX: 0 }}
+      transition={{ type: 'timing', duration: 280, delay: (index ?? 0) * 28 }}
+    >
+      {hasSwipe ? (
+        <Swipeable
+          ref={swipeableRef}
+          renderLeftActions={renderLeftActions}
+          renderRightActions={renderRightActions}
+          overshootLeft={false}
+          overshootRight={false}
+        >
+          {row}
+        </Swipeable>
+      ) : (
+        row
+      )}
     </MotiView>
   );
 });

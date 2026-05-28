@@ -11,7 +11,6 @@ import { useTrackDownload } from '../hooks/useTrackDownload';
 import { useLyrics } from '../hooks/useLyrics';
 import { COLORS, FONTS } from '../constants/theme';
 import TerminalArtwork from '../components/player/TerminalArtwork';
-import VisualizerView from '../components/player/VisualizerView';
 import LyricsView from '../components/player/LyricsView';
 import ProgressScrub from '../components/player/ProgressScrub';
 import PlayerControls from '../components/player/PlayerControls';
@@ -31,7 +30,6 @@ export default function PlayerScreen() {
   const isPlaying = playbackState.state === State.Playing;
 
   const [showLyrics, setShowLyrics] = useState(false);
-  const [visualizerMode, setVisualizerMode] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
 
   const { downloadState, downloadProgress, setDownloadState, handleDownload, handlePauseDownload, handleResumeDownload } =
@@ -86,13 +84,7 @@ export default function PlayerScreen() {
     TrackPlayer.seekTo(ratio * progress.duration);
   }
 
-  function enterVisualizer() {
-    setShowLyrics(false);
-    setVisualizerMode((v) => !v);
-  }
-
   function toggleLyrics() {
-    setVisualizerMode(false);
     setShowLyrics((v) => !v);
   }
 
@@ -126,16 +118,12 @@ export default function PlayerScreen() {
           </Pressable>
         </View>
 
-        {/* Artwork / visualizer / lyrics */}
+        {/* Artwork / lyrics */}
         <View style={{ minHeight: ARTWORK_SIZE + 60, marginTop: 8, justifyContent: 'center' }}>
-          {visualizerMode ? (
-            <Pressable onPress={enterVisualizer}>
-              <VisualizerView size={ARTWORK_SIZE} />
-            </Pressable>
-          ) : showLyrics && lyrics ? (
+          {showLyrics && lyrics ? (
             <LyricsView lyrics={lyrics} activeLyricIdx={activeLyricIdx} height={ARTWORK_SIZE + 40} />
           ) : (
-            <TerminalArtwork uri={currentTrack.artwork} size={ARTWORK_SIZE} onPress={enterVisualizer} />
+            <TerminalArtwork uri={currentTrack.artwork} size={ARTWORK_SIZE} onPress={toggleLyrics} />
           )}
         </View>
 

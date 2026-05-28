@@ -13,7 +13,7 @@ import { COLORS, FONTS } from '../../constants/theme';
 export default function FavoritesScreen() {
   const router = useRouter();
   const { favoriteTracks } = useLibraryStore();
-  const { playQueue, currentTrack } = usePlayerStore();
+  const { playQueue, currentTrack, addToQueue } = usePlayerStore();
   const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
 
   return (
@@ -70,6 +70,9 @@ export default function FavoritesScreen() {
                 setActionTrack({ id: t.videoId, videoId: t.videoId, title: t.title, artist: t.artist, artwork: t.artwork, duration: t.duration })
               }
               onPress={() => playQueue(favoriteTracks.map((ft) => ({ id: ft.videoId, ...ft })), i)}
+              onSwipeRight={() =>
+                addToQueue({ id: t.videoId, videoId: t.videoId, title: t.title, artist: t.artist, artwork: t.artwork, duration: t.duration })
+              }
             />
           ))}
         </ScrollView>

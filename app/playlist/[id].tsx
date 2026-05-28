@@ -36,7 +36,7 @@ export default function PlaylistScreen() {
     playlists, getPlaylistTracks, deletePlaylist, renamePlaylist,
     removeTrackFromPlaylist, moveTrackInPlaylist,
   } = useLibraryStore();
-  const { playQueue, currentTrack, setShuffle } = usePlayerStore();
+  const { playQueue, currentTrack, setShuffle, addToQueue } = usePlayerStore();
 
   const playlist = playlists.find((p) => p.id === id);
   const [tracks, setTracks] = useState<PlaylistTrack[]>([]);
@@ -113,6 +113,11 @@ export default function PlaylistScreen() {
         },
       },
     ]);
+  }
+
+  function quickRemoveTrack(t: PlaylistTrack) {
+    removeTrackFromPlaylist(t.id);
+    refreshTracks();
   }
 
   const coverArt = tracks[0]?.artwork;
@@ -303,6 +308,17 @@ export default function PlaylistScreen() {
                   }
                   onPress={() => playQueue(tracks.map(toTrack), i)}
                   onMore={() => handleRemoveTrack(t)}
+                  onSwipeRight={() =>
+                    addToQueue({
+                      id: t.video_id,
+                      videoId: t.video_id,
+                      title: t.title,
+                      artist: t.artist,
+                      artwork: t.artwork ?? undefined,
+                      duration: t.duration,
+                    })
+                  }
+                  onSwipeLeft={() => quickRemoveTrack(t)}
                 />
               </View>
             </View>

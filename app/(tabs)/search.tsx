@@ -41,7 +41,7 @@ export default function SearchScreen() {
   const [results, setResults] = useState<VideoInfo[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const { playQueue, currentTrack } = usePlayerStore();
+  const { playQueue, currentTrack, addToQueue } = usePlayerStore();
   const favorites = useLibraryStore((s) => s.favorites);
   const toggleFavorite = useLibraryStore((s) => s.toggleFavorite);
   const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
@@ -176,6 +176,16 @@ export default function SearchScreen() {
                         })
                       }
                       onPress={() => playQueue(results.map(toTrack), i)}
+                      onSwipeRight={() =>
+                        addToQueue({
+                          id: video.videoId,
+                          videoId: video.videoId,
+                          title: video.title,
+                          artist: video.artist,
+                          artwork: video.artwork,
+                          duration: video.duration,
+                        })
+                      }
                     />
                   ))}
 

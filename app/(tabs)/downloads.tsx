@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, Share } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import * as Sharing from 'expo-sharing';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Trash2, Share2 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -13,15 +14,19 @@ import { COLORS, FONTS } from '../../constants/theme';
 export default function DownloadsScreen() {
   const router = useRouter();
   const { downloads, deleteDownload } = useDownloadStore();
-  const { playQueue, currentTrack } = usePlayerStore();
+  const { playQueue, currentTrack, addToQueue } = usePlayerStore();
   const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
 
-  async function handleShare(filePath: string, title: string) {
+  async function handleShare(filePath: string) {
     try {
-      await Share.share({
-        url: filePath.startsWith('file://') ? filePath : `file://${filePath}`,
-        title,
-      });
+      const uri = filePath.startsWith('file://') ? filePath : `file://${filePath}`;
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        await Sharing.shareAsync(uri, {
+          mimeType: 'audio/mpeg',
+          dialogTitle: 'Share track',
+        });
+      }
     } catch (e) {
       console.warn('[downloads] share failed:', e);
     }
@@ -100,10 +105,20 @@ export default function DownloadsScreen() {
                       i,
                     )
                   }
+                  onSwipeRight={() =>
+                    addToQueue({
+                      id: d.video_id,
+                      videoId: d.video_id,
+                      title: d.title,
+                      artist: d.artist,
+                      artwork: d.artwork,
+                      duration: d.duration,
+                    })
+                  }
                 />
               </View>
               <TouchableOpacity
-                onPress={() => handleShare(d.file_path, d.title)}
+                onPress={() => handleShare(d.file_path)}
                 style={{ paddingRight: 4, paddingLeft: 8, paddingVertical: 16 }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
