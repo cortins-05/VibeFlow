@@ -8,15 +8,18 @@ import {
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, ListMusic, Heart, Clock, Download, ChevronRight } from 'lucide-react-native';
+import { Plus, ListMusic, Heart, Clock, Download, ChevronRight, Upload } from 'lucide-react-native';
 import { MotiView } from 'moti';
 import { useRouter } from 'expo-router';
+import * as DocumentPicker from 'expo-document-picker';
 import TrackRow from '../../components/TrackRow';
 import ConsoleHeader from '../../components/ui/ConsoleHeader';
 import SectionHeader from '../../components/ui/SectionHeader';
+import ImportReviewModal from '../../components/ImportReviewModal';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { useDownloadStore } from '../../stores/downloadStore';
 import { useTheme, glow } from '../../constants/theme';
+import { importPlaylistFromFile, type ParsedTrack } from '../../services/playlistImporter';
 
 export default function LibraryScreen() {
   const { colors, fonts } = useTheme();
@@ -25,6 +28,9 @@ export default function LibraryScreen() {
   const { downloads, loadDownloads } = useDownloadStore();
   const [showCreate, setShowCreate] = useState(false);
   const [playlistName, setPlaylistName] = useState('');
+  const [importTracks, setImportTracks] = useState<ParsedTrack[]>([]);
+  const [importName, setImportName] = useState('');
+  const [showImport, setShowImport] = useState(false);
 
   useEffect(() => { loadDownloads(); }, []);
 
@@ -35,31 +41,69 @@ export default function LibraryScreen() {
     setShowCreate(false);
   }
 
+  async function handleImport() {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['text/csv', 'text/plain', 'application/json', '*/*'],
+        copyToCacheDirectory: true,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+
+      const file = await importPlaylistFromFile(result.assets[0].uri);
+      if (!file || file.tracks.length === 0) return;
+
+      setImportName(file.name);
+      setImportTracks(file.tracks);
+      setShowImport(true);
+    } catch {
+      // silent fail
+    }
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingRight: 20 }}>
           <ConsoleHeader path="library" title="Library" />
-          <TouchableOpacity
-            onPress={() => setShowCreate(true)}
-            activeOpacity={0.8}
-            style={{
-              marginBottom: 12,
-              paddingHorizontal: 12,
-              paddingVertical: 8,
-              borderRadius: 4,
-              borderWidth: 1,
-              borderColor: colors.borderAccent,
-              flexDirection: 'row',
-              alignItems: 'center',
-              ...glow(colors.accent, 4, 0.3),
-            }}
-          >
-            <Plus color={colors.accent} size={14} strokeWidth={2} />
-            <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.accent, marginLeft: 6 }}>
-              new
-            </Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+            <TouchableOpacity
+              onPress={handleImport}
+              activeOpacity={0.8}
+              style={{
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                borderRadius: 4,
+                borderWidth: 1,
+                borderColor: colors.border,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <Upload color={colors.textDim} size={14} strokeWidth={2} />
+              <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim, marginLeft: 6 }}>
+                import
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShowCreate(true)}
+              activeOpacity={0.8}
+              style={{
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                borderRadius: 4,
+                borderWidth: 1,
+                borderColor: colors.borderAccent,
+                flexDirection: 'row',
+                alignItems: 'center',
+                ...glow(colors.accent, 4, 0.3),
+              }}
+            >
+              <Plus color={colors.accent} size={14} strokeWidth={2} />
+              <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.accent, marginLeft: 6 }}>
+                new
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <ScrollView
@@ -238,6 +282,12 @@ export default function LibraryScreen() {
           </View>
         </View>
       </Modal>
+      <ImportReviewModal
+        visible={showImport}
+        playlistName={importName}
+        tracks={importTracks}
+        onClose={() => setShowImport(false)}
+      />
     </View>
   );
 }
