@@ -2,6 +2,41 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+---
+
+## ✅ STATUS: COMPLETE (2026-05-28) — read this first
+
+**Plan 1 fully implemented. All 13 tasks done. Branch: `main`. TypeCheck clean. Working tree clean.**
+
+**Commits on `main` (6 ahead of `origin/main`, NOT yet pushed):**
+| Commit | Covers |
+|--------|--------|
+| `ad8f9f3` | baseline checkpoint (pre-existing app state + this plan) |
+| `69c3f7d` | Task 1 — theme tokens (`constants/theme.ts` + `tailwind.config.js`) |
+| `f7bc9ec` | Task 2 — `components/ui/` primitives + dark root `app/_layout.tsx` |
+| `d2d74b3` | Task 3 — hooks `useTrackDownload` + `useLyrics` (verbatim logic) |
+| `214ab5b` | Task 4 — split player into `components/player/`, remove vinyl |
+| `1db0eb3` | Task 5 — TrackRow reskin |
+| `dcac21b` | Tasks 6–12 — bundled: tab bar, MiniPlayer, all screens, playlist, DownloadButton, AddToPlaylistModal |
+
+**Verification done (Task 13):**
+- `npx tsc --noEmit` → PASS (whole project).
+- `grep -rn` legacy hex in `app/` + `components/` → 0 results (all tokens).
+- Backend untouched confirmed via `git diff`: `services/youtube.ts`, `services/db.ts`, `stores/playerStore.ts`, `stores/downloadStore.ts` NOT modified. `app/_layout.tsx` changed only bg color + StatusBar (videoId/event logic intact).
+
+**NOT done (handled by user, not the agent):**
+- ⏳ **Device smoke test** (Task 4 Step 9 + Task 13 Step 3): `npx expo run:android` / APK install on Pixel 10. User runs this manually. APK from prior build at `android/app/build/outputs/apk/debug/app-debug.apk` predates this redesign — **a fresh build is required** to see the console UI on device.
+- ⏳ **Push to origin** (6 commits ahead). Not pushed — awaiting user decision.
+
+**Deviations from plan (intentional, all fine):**
+- `app/player.tsx` ended at **193 lines** (plan target ~150). Acceptable.
+- Tasks 6–12 committed as **one bundle** (`dcac21b`) instead of per-task commits — work was done in a resumed session post-context-compaction.
+- Some primitives (`Caret`, `ConsoleButton`, `StatusLine`, `Tag`, `ScanlineOverlay`) exist and are used where relevant; `ScanlineOverlay` is built but not yet mounted on any screen (available for future use).
+
+**Next:** Plan 2 — native Android FFT visualizer (see `## Next` at bottom). The `components/player/VisualizerView.tsx` placeholder is the slot to replace.
+
+---
+
 **Goal:** Re-skin the entire VibeFlow app to a futuristic programmer-console / CMD aesthetic (neon-yellow + cyan on dark), and refactor the codebase into clean modular units (UI separated from logic) — with zero change to playback/download behavior.
 
 **Architecture:** Centralize design tokens in `constants/theme.ts` + `tailwind.config.js`. Build reusable console primitives in `components/ui/`. Extract stateful logic out of `app/player.tsx` into `hooks/` (moved verbatim — no behavior change). Split the 772-line player into focused `components/player/` parts. Re-skin every screen using the primitives. The audio visualizer is a placeholder slot here; the real native FFT engine is **Plan 2**.
@@ -55,7 +90,7 @@ app/playlist/[id].tsx         # RESKIN
 - Create: `constants/theme.ts`
 - Modify: `tailwind.config.js` (replace `colors` + `fontFamily`)
 
-- [ ] **Step 1: Create `constants/theme.ts`**
+- [x] **Step 1: Create `constants/theme.ts`**
 
 ```ts
 // constants/theme.ts — single source of truth for the console theme.
@@ -95,7 +130,7 @@ export function glow(color: string, radius = 12, opacity = 0.6) {
 }
 ```
 
-- [ ] **Step 2: Rewrite `tailwind.config.js` `theme.extend.colors` and `fontFamily`**
+- [x] **Step 2: Rewrite `tailwind.config.js` `theme.extend.colors` and `fontFamily`**
 
 Replace the entire `colors: {...}` block and `fontFamily: {...}` block with:
 
@@ -120,12 +155,12 @@ Replace the entire `colors: {...}` block and `fontFamily: {...}` block with:
       },
 ```
 
-- [ ] **Step 3: Verify typecheck**
+- [x] **Step 3: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: PASS (no errors). The new `theme.ts` is valid TS; tailwind config is JS (not typechecked).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add constants/theme.ts tailwind.config.js
@@ -139,7 +174,7 @@ git commit -m "feat(theme): console palette tokens (neon yellow + cyan)"
 **Files:**
 - Create: `components/ui/Caret.tsx`, `ConsoleHeader.tsx`, `SectionHeader.tsx`, `Tag.tsx`, `ConsoleButton.tsx`, `StatusLine.tsx`, `ScanlineOverlay.tsx`
 
-- [ ] **Step 1: `components/ui/Caret.tsx`** (blinking block cursor)
+- [x] **Step 1: `components/ui/Caret.tsx`** (blinking block cursor)
 
 ```tsx
 import { useEffect } from 'react';
@@ -157,7 +192,7 @@ export default function Caret({ size = 16, color = COLORS.accent }: { size?: num
 }
 ```
 
-- [ ] **Step 2: `components/ui/ConsoleHeader.tsx`** (prompt-style screen title)
+- [x] **Step 2: `components/ui/ConsoleHeader.tsx`** (prompt-style screen title)
 
 ```tsx
 import { View, Text } from 'react-native';
@@ -181,7 +216,7 @@ export default function ConsoleHeader({ path, title }: { path: string; title?: s
 }
 ```
 
-- [ ] **Step 3: `components/ui/SectionHeader.tsx`**
+- [x] **Step 3: `components/ui/SectionHeader.tsx`**
 
 ```tsx
 import { View, Text } from 'react-native';
@@ -200,7 +235,7 @@ export default function SectionHeader({ label, count }: { label: string; count?:
 }
 ```
 
-- [ ] **Step 4: `components/ui/Tag.tsx`**
+- [x] **Step 4: `components/ui/Tag.tsx`**
 
 ```tsx
 import { Text, Pressable } from 'react-native';
@@ -222,7 +257,7 @@ export default function Tag({ label, active, onPress }: { label: string; active?
 }
 ```
 
-- [ ] **Step 5: `components/ui/ConsoleButton.tsx`**
+- [x] **Step 5: `components/ui/ConsoleButton.tsx`**
 
 ```tsx
 import { Text, Pressable, ViewStyle } from 'react-native';
@@ -249,7 +284,7 @@ export default function ConsoleButton({ label, onPress, variant = 'ghost', fille
 }
 ```
 
-- [ ] **Step 6: `components/ui/StatusLine.tsx`**
+- [x] **Step 6: `components/ui/StatusLine.tsx`**
 
 ```tsx
 import { View, Text, ViewStyle } from 'react-native';
@@ -268,7 +303,7 @@ export default function StatusLine({ segments, style }: { segments: { text: stri
 }
 ```
 
-- [ ] **Step 7: `components/ui/ScanlineOverlay.tsx`** (CRT texture, non-interactive)
+- [x] **Step 7: `components/ui/ScanlineOverlay.tsx`** (CRT texture, non-interactive)
 
 ```tsx
 import { View } from 'react-native';
@@ -286,12 +321,12 @@ export default function ScanlineOverlay({ opacity = 0.04 }: { opacity?: number }
 }
 ```
 
-- [ ] **Step 8: Verify typecheck**
+- [x] **Step 8: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: PASS.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add components/ui
@@ -306,7 +341,7 @@ git commit -m "feat(ui): console primitive components"
 - Create: `hooks/useTrackDownload.ts`, `hooks/useLyrics.ts`
 - (No screen wiring yet — wired in Task 4.)
 
-- [ ] **Step 1: Create `hooks/useTrackDownload.ts` — move the download state machine VERBATIM**
+- [x] **Step 1: Create `hooks/useTrackDownload.ts` — move the download state machine VERBATIM**
 
 Move the download logic out of `app/player.tsx` unchanged. Copy the exact bodies of `handleDownload`, `handlePauseDownload`, `handleResumeDownload`, the two `useEffect`s that reset/init download state on track change, and the refs. Do **not** alter any string, header, ref, or branch.
 
@@ -419,7 +454,7 @@ export function useTrackDownload(currentTrack: Track | null) {
 }
 ```
 
-- [ ] **Step 2: Create `hooks/useLyrics.ts` — move lyric fetch + active-line tracking**
+- [x] **Step 2: Create `hooks/useLyrics.ts` — move lyric fetch + active-line tracking**
 
 ```ts
 import { useState, useEffect } from 'react';
@@ -444,12 +479,12 @@ export function useLyrics(currentTrack: Track | null, position: number) {
 }
 ```
 
-- [ ] **Step 3: Verify typecheck**
+- [x] **Step 3: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: PASS. (Hooks are unused so far — fine.)
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add hooks/useTrackDownload.ts hooks/useLyrics.ts
@@ -466,7 +501,7 @@ git commit -m "refactor(player): extract download + lyrics logic into hooks (ver
 
 **CRITICAL:** preserve every handler. `handleSkipNext`/`handleSkipPrev` (store queue + `playQueue`), `togglePlayPause`, `handleShuffle`, `handleRepeat`, `handleSeek` stay exactly as in the current `player.tsx`. Only their JSX presentation changes. The vinyl/rotating disc is removed.
 
-- [ ] **Step 1: `components/player/TerminalArtwork.tsx`** (framed square, NO vinyl, tappable to toggle visualizer)
+- [x] **Step 1: `components/player/TerminalArtwork.tsx`** (framed square, NO vinyl, tappable to toggle visualizer)
 
 ```tsx
 import { View, Text, Pressable } from 'react-native';
@@ -489,7 +524,7 @@ export default function TerminalArtwork({ uri, size, onPress }: { uri?: string; 
 }
 ```
 
-- [ ] **Step 2: `components/player/VisualizerView.tsx`** (PLACEHOLDER — static bars; real FFT engine = Plan 2)
+- [x] **Step 2: `components/player/VisualizerView.tsx`** (PLACEHOLDER — static bars; real FFT engine = Plan 2)
 
 ```tsx
 import { View } from 'react-native';
@@ -508,7 +543,7 @@ export default function VisualizerView({ size }: { size: number }) {
 }
 ```
 
-- [ ] **Step 3: `components/player/ProgressScrub.tsx`** (mono seek bar; keeps the responder-based seek)
+- [x] **Step 3: `components/player/ProgressScrub.tsx`** (mono seek bar; keeps the responder-based seek)
 
 ```tsx
 import { View, Text } from 'react-native';
@@ -542,7 +577,7 @@ export default function ProgressScrub({ position, duration, trackWidth, onSeek }
 }
 ```
 
-- [ ] **Step 4: `components/player/PlayerControls.tsx`**
+- [x] **Step 4: `components/player/PlayerControls.tsx`**
 
 Props: `{ isPlaying, shuffle, repeat, onShuffle, onPrev, onPlayPause, onNext, onRepeat }`. Render the same 5-control row (Shuffle, SkipBack, Play/Pause, SkipForward, Repeat/Repeat1) using lucide icons. Active color = `COLORS.accent`, inactive = `COLORS.textFaint`. Center play/pause button: square (radius 6) `backgroundColor: COLORS.accent`, icon color `COLORS.bg`, with `glow(COLORS.accent, 24, 0.5)`. Repeat icon shows `Repeat1` when `repeat === RepeatMode.Track` else `Repeat`, accent when `Queue`/`Track`. Wire `onPress` to the passed callbacks (which are the unchanged player handlers).
 
@@ -580,7 +615,7 @@ export default function PlayerControls(p: {
 }
 ```
 
-- [ ] **Step 5: `components/player/SecondaryActions.tsx`**
+- [x] **Step 5: `components/player/SecondaryActions.tsx`**
 
 Props: `{ fav, onToggleFav, hasLyrics, showLyrics, onToggleLyrics, downloadProps }`. Render the Save and Lyrics pills as bracketed `ConsoleButton`s (Save → `secondary` variant when saved, `ghost` otherwise; Lyrics → `accent` when shown). Render `<DownloadButton {...downloadProps} />` (DownloadButton restyled in Task 12). Wire callbacks to the unchanged handlers.
 
@@ -605,11 +640,11 @@ export default function SecondaryActions(p: {
 }
 ```
 
-- [ ] **Step 6: `components/player/LyricsView.tsx`**
+- [x] **Step 6: `components/player/LyricsView.tsx`**
 
 Move the lyrics overlay JSX from the current `player.tsx` (the `BlurView` + `ScrollView` + mapped lines). Props: `{ lyrics, activeLyricIdx }`. Keep the auto-scroll: a local `ScrollView` ref + an effect that scrolls to `Math.max(0, activeLyricIdx - 2) * 56` when `activeLyricIdx` changes. Recolor: active line `COLORS.text` + accent marker bar (`COLORS.accent` with `glow`), past lines `COLORS.textFaint`, future lines `COLORS.textDim`. Active line font `FONTS.sans` size 22; others `FONTS.sansReg` size 15.
 
-- [ ] **Step 7: Rewrite `app/player.tsx` — slim composition**
+- [x] **Step 7: Rewrite `app/player.tsx` — slim composition**
 
 Replace the file with a lean version: keep imports for state/handlers; use `useTrackDownload(currentTrack)` and `useLyrics(currentTrack, progress.position)`; keep `togglePlayPause`, `handleSkipNext`, `handleSkipPrev`, `handleShuffle`, `handleRepeat`, `handleSeek` **unchanged**; add `const [visualizerMode, setVisualizerMode] = useState(false)`; compose header + (`visualizerMode ? <VisualizerView/> : showLyrics ? <LyricsView/> : <TerminalArtwork onPress={() => setVisualizerMode(v => !v)}/>`) + title/artist (mono artist, Manrope title) + `<ProgressScrub/>` + `<PlayerControls/>` + `<SecondaryActions/>`. Background: solid `COLORS.bg` (remove the orange `LinearGradient`). Keep the `if (!currentTrack) { router.back(); return null; }` guard.
 
@@ -624,17 +659,17 @@ const [visualizerMode, setVisualizerMode] = useState(false);
 // { state: downloadState, progress: downloadProgress, onDownload: handleDownload, onPause: handlePauseDownload, onResume: handleResumeDownload, onDismiss: () => setDownloadState('idle') }
 ```
 
-- [ ] **Step 8: Verify typecheck**
+- [x] **Step 8: Verify typecheck**
 
 Run: `npx tsc --noEmit`
 Expected: PASS.
 
-- [ ] **Step 9: Verify on device** (behavior-preserving check)
+- [ ] **Step 9: Verify on device** (behavior-preserving check) — ⏳ USER RUNS THIS
 
 Run: `npx expo run:android`
 Confirm: play/pause, next/prev, shuffle, repeat, seek, favorite, lyrics toggle, and download (start/pause/resume) all still work. Tapping artwork toggles the placeholder visualizer. No vinyl/rotation.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add app/player.tsx components/player
@@ -647,11 +682,11 @@ git commit -m "refactor(player): split into modular parts + console reskin, remo
 
 **Files:** Modify `components/TrackRow.tsx`
 
-- [ ] **Step 1: Reskin to mono columnar row.** Keep the `Props` interface, `formatDuration`, `memo`, and all callbacks/`MotiView` animation **unchanged**. Change only styles/colors: index numeral `FONTS.mono` color `isActive ? COLORS.accent : COLORS.textFaint`; artwork radius 4, bg `COLORS.surface`; active row `borderLeftColor: COLORS.accent` + `backgroundColor: 'rgba(229,255,58,0.05)'` and the overlay Pause icon color `COLORS.accent`; title `FONTS.sans` `COLORS.text`; artist `FONTS.mono` size 11 `COLORS.textDim`; duration `FONTS.mono` `COLORS.textFaint`; favorite Heart active `COLORS.secondary` (saved = positive) else `COLORS.textFaint`; MoreVertical `COLORS.textFaint`. Replace all old hex (`#ff5c2e`, `#f5efe3`, `#5a4d42`, `#a08a78`, `#15110e`) with tokens.
+- [x] **Step 1: Reskin to mono columnar row.** Keep the `Props` interface, `formatDuration`, `memo`, and all callbacks/`MotiView` animation **unchanged**. Change only styles/colors: index numeral `FONTS.mono` color `isActive ? COLORS.accent : COLORS.textFaint`; artwork radius 4, bg `COLORS.surface`; active row `borderLeftColor: COLORS.accent` + `backgroundColor: 'rgba(229,255,58,0.05)'` and the overlay Pause icon color `COLORS.accent`; title `FONTS.sans` `COLORS.text`; artist `FONTS.mono` size 11 `COLORS.textDim`; duration `FONTS.mono` `COLORS.textFaint`; favorite Heart active `COLORS.secondary` (saved = positive) else `COLORS.textFaint`; MoreVertical `COLORS.textFaint`. Replace all old hex (`#ff5c2e`, `#f5efe3`, `#5a4d42`, `#a08a78`, `#15110e`) with tokens.
 
-- [ ] **Step 2: Verify typecheck** — Run: `npx tsc --noEmit` → PASS.
+- [x] **Step 2: Verify typecheck** — Run: `npx tsc --noEmit` → PASS.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add components/TrackRow.tsx
@@ -664,11 +699,11 @@ git commit -m "feat(ui): console reskin TrackRow"
 
 **Files:** Modify `app/(tabs)/_layout.tsx`
 
-- [ ] **Step 1: Reskin `TabButton` + tab bar container.** Keep the `TABS` array, `Tabs`/`Tabs.Screen` structure, navigation `emit`/`navigate` logic, and `<MiniPlayer/>` **unchanged**. Change presentation: tab bar container `backgroundColor: COLORS.bg`, `borderTopColor: COLORS.border`. Replace each tab's icon+label with a mono bracketed label: focused → `[label]` in `COLORS.accent` with `glow`; unfocused → `label` in `COLORS.textFaint`. Keep the icon optional/small above (size 16, focused `COLORS.accent` else `COLORS.textFaint`) OR drop icons entirely and keep only the bracketed mono label per the console aesthetic. Keep the animated `scale`/`indicator` shared values; recolor indicator bar to `COLORS.accent`.
+- [x] **Step 1: Reskin `TabButton` + tab bar container.** Keep the `TABS` array, `Tabs`/`Tabs.Screen` structure, navigation `emit`/`navigate` logic, and `<MiniPlayer/>` **unchanged**. Change presentation: tab bar container `backgroundColor: COLORS.bg`, `borderTopColor: COLORS.border`. Replace each tab's icon+label with a mono bracketed label: focused → `[label]` in `COLORS.accent` with `glow`; unfocused → `label` in `COLORS.textFaint`. Keep the icon optional/small above (size 16, focused `COLORS.accent` else `COLORS.textFaint`) OR drop icons entirely and keep only the bracketed mono label per the console aesthetic. Keep the animated `scale`/`indicator` shared values; recolor indicator bar to `COLORS.accent`.
 
-- [ ] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
+- [x] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add "app/(tabs)/_layout.tsx"
@@ -681,11 +716,11 @@ git commit -m "feat(ui): console tab bar"
 
 **Files:** Modify `components/MiniPlayer.tsx`
 
-- [ ] **Step 1: Reskin.** Keep `memo`, store/playback hooks, `translateY` spring animation, the `router.push('/player')` press, and the play/pause + `skipToNext` buttons (logic) **unchanged**. Restyle the card: drop the `BlurView`'s warm bg → `backgroundColor: COLORS.surface`, `borderColor: COLORS.border`, radius 6. Title `FONTS.sans` `COLORS.text`; artist `FONTS.mono` `COLORS.textDim`; add a leading mono status glyph `▶`/`❚❚` in `COLORS.accent` reflecting `isPlaying`. Progress bar fill → `COLORS.accent` with `glow`. Optionally append a mono right-side timestamp `position/duration` in `COLORS.secondary`.
+- [x] **Step 1: Reskin.** Keep `memo`, store/playback hooks, `translateY` spring animation, the `router.push('/player')` press, and the play/pause + `skipToNext` buttons (logic) **unchanged**. Restyle the card: drop the `BlurView`'s warm bg → `backgroundColor: COLORS.surface`, `borderColor: COLORS.border`, radius 6. Title `FONTS.sans` `COLORS.text`; artist `FONTS.mono` `COLORS.textDim`; add a leading mono status glyph `▶`/`❚❚` in `COLORS.accent` reflecting `isPlaying`. Progress bar fill → `COLORS.accent` with `glow`. Optionally append a mono right-side timestamp `position/duration` in `COLORS.secondary`.
 
-- [ ] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
+- [x] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add components/MiniPlayer.tsx
@@ -698,15 +733,15 @@ git commit -m "feat(ui): MiniPlayer console status line"
 
 **Files:** Modify `app/(tabs)/index.tsx`
 
-- [ ] **Step 1: Reskin using primitives.** Keep ALL data logic unchanged: `loadTrending`, fallback search, `onRefresh`, `toTrack`, `playQueue`, favorites, `AddToPlaylistModal`. Replace presentation:
+- [x] **Step 1: Reskin using primitives.** Keep ALL data logic unchanged: `loadTrending`, fallback search, `onRefresh`, `toTrack`, `playQueue`, favorites, `AddToPlaylistModal`. Replace presentation:
   - Remove the orange `LinearGradient`; background `COLORS.bg`.
   - Replace the `Discover.` header block with `<ConsoleHeader path="discover" title="Discover" />`.
   - Replace the mood `TouchableOpacity` chips with `<Tag label={mood.label.toLowerCase()} onPress={...} />` (keep the same `router.push` to search with `mood.query`).
   - Replace inline `SectionHeader` function usage with the new `components/ui/SectionHeader` (`label`, `count`). Delete the local `SectionHeader` defined at the bottom of the file.
   - `ActivityIndicator` color → `COLORS.accent`. Error retry button → `<ConsoleButton label="try again" variant="accent" onPress={loadTrending} />`. Error text `COLORS.textDim`.
   - `RefreshControl` tintColor → `COLORS.accent`.
-- [ ] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
-- [ ] **Step 3: Commit**
+- [x] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
+- [x] **Step 3: Commit**
 
 ```bash
 git add "app/(tabs)/index.tsx"
@@ -719,9 +754,9 @@ git commit -m "feat(ui): console reskin Discover"
 
 **Files:** Modify `app/(tabs)/search.tsx`
 
-- [ ] **Step 1: Read the file first**, then reskin keeping all search logic/state/handlers unchanged. Apply: `<ConsoleHeader path="search" />`; search input styled as a console field — `backgroundColor: COLORS.surface`, `borderColor: COLORS.border` (→ `COLORS.borderAccent` on focus), `FONTS.mono` text `COLORS.text`, placeholder `COLORS.textFaint`, leading `>` prompt glyph in `COLORS.accent`; results use the (already reskinned) `TrackRow`; loading `ActivityIndicator` `COLORS.accent`; empty/hint text `COLORS.textDim`.
-- [ ] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
-- [ ] **Step 3: Commit** — `git add "app/(tabs)/search.tsx" && git commit -m "feat(ui): console reskin Search"`
+- [x] **Step 1: Read the file first**, then reskin keeping all search logic/state/handlers unchanged. Apply: `<ConsoleHeader path="search" />`; search input styled as a console field — `backgroundColor: COLORS.surface`, `borderColor: COLORS.border` (→ `COLORS.borderAccent` on focus), `FONTS.mono` text `COLORS.text`, placeholder `COLORS.textFaint`, leading `>` prompt glyph in `COLORS.accent`; results use the (already reskinned) `TrackRow`; loading `ActivityIndicator` `COLORS.accent`; empty/hint text `COLORS.textDim`.
+- [x] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
+- [x] **Step 3: Commit** — `git add "app/(tabs)/search.tsx" && git commit -m "feat(ui): console reskin Search"`
 
 ---
 
@@ -729,9 +764,9 @@ git commit -m "feat(ui): console reskin Discover"
 
 **Files:** Modify `app/(tabs)/library.tsx`, `app/(tabs)/favorites.tsx`, `app/(tabs)/history.tsx`, `app/(tabs)/downloads.tsx`
 
-- [ ] **Step 1:** For each file: read it, keep all data/logic/handlers unchanged, and apply the console language — background `COLORS.bg`, `<ConsoleHeader path="library|favorites|history|downloads" title=... />`, `components/ui/SectionHeader` for section titles, `TrackRow` for lists, `ConsoleButton`/`Tag` for actions, empty states in `COLORS.textDim` with a mono hint (e.g. `// no favorites yet`). Replace every legacy hex with tokens.
-- [ ] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
-- [ ] **Step 3: Commit** — `git add "app/(tabs)/library.tsx" "app/(tabs)/favorites.tsx" "app/(tabs)/history.tsx" "app/(tabs)/downloads.tsx" && git commit -m "feat(ui): console reskin library/favorites/history/downloads"`
+- [x] **Step 1:** For each file: read it, keep all data/logic/handlers unchanged, and apply the console language — background `COLORS.bg`, `<ConsoleHeader path="library|favorites|history|downloads" title=... />`, `components/ui/SectionHeader` for section titles, `TrackRow` for lists, `ConsoleButton`/`Tag` for actions, empty states in `COLORS.textDim` with a mono hint (e.g. `// no favorites yet`). Replace every legacy hex with tokens.
+- [x] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
+- [x] **Step 3: Commit** — `git add "app/(tabs)/library.tsx" "app/(tabs)/favorites.tsx" "app/(tabs)/history.tsx" "app/(tabs)/downloads.tsx" && git commit -m "feat(ui): console reskin library/favorites/history/downloads"`
 
 ---
 
@@ -739,9 +774,9 @@ git commit -m "feat(ui): console reskin Discover"
 
 **Files:** Modify `app/(tabs)/settings.tsx`
 
-- [ ] **Step 1:** Read it, keep all logic. Reskin: `<ConsoleHeader path="settings" title="Settings" />`, rows as mono `key : value` lines with `COLORS.border` dividers, toggles/buttons via `ConsoleButton`. Use `StatusLine` for any app-info/version row (e.g. `vibeflow · v1.0.0 · android`). If a "CRT scanlines" toggle is trivial to add (writes a boolean to existing settings store), add it; otherwise skip (YAGNI).
-- [ ] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
-- [ ] **Step 3: Commit** — `git add "app/(tabs)/settings.tsx" && git commit -m "feat(ui): console reskin Settings"`
+- [x] **Step 1:** Read it, keep all logic. Reskin: `<ConsoleHeader path="settings" title="Settings" />`, rows as mono `key : value` lines with `COLORS.border` dividers, toggles/buttons via `ConsoleButton`. Use `StatusLine` for any app-info/version row (e.g. `vibeflow · v1.0.0 · android`). If a "CRT scanlines" toggle is trivial to add (writes a boolean to existing settings store), add it; otherwise skip (YAGNI).
+- [x] **Step 2: Verify typecheck** — `npx tsc --noEmit` → PASS.
+- [x] **Step 3: Commit** — `git add "app/(tabs)/settings.tsx" && git commit -m "feat(ui): console reskin Settings"`
 
 ---
 
@@ -749,20 +784,20 @@ git commit -m "feat(ui): console reskin Discover"
 
 **Files:** Modify `app/playlist/[id].tsx`, `components/DownloadButton.tsx`, `components/AddToPlaylistModal.tsx`
 
-- [ ] **Step 1: `components/DownloadButton.tsx`** — read it; keep the state-prop API (`state`, `progress`, `onDownload`, `onPause`, `onResume`, `onDismiss`) and all branching unchanged. Reskin each state to tokens: `idle` → `ConsoleButton label="download"` ghost; `downloading`/`paused` → progress bar + `%` in mono (`COLORS.accent` active, `COLORS.secondary` paused) + pause/resume bracket; `done` → `[ saved ✓ ]` in `COLORS.secondary` (filled, glow); `error` → `[ failed · retry ]` in `COLORS.error`; `pausing` → spinner `COLORS.accent`.
-- [ ] **Step 2: `components/AddToPlaylistModal.tsx`** — read it; keep all logic/props. Reskin modal surface `COLORS.surface`, border `COLORS.border`, mono header `[ add to playlist ]`, list rows mono, create-button `ConsoleButton accent`.
-- [ ] **Step 3: `app/playlist/[id].tsx`** — read it; keep logic. Apply `ConsoleHeader path="playlist"` + playlist title, `TrackRow` list, `SectionHeader`, token colors.
-- [ ] **Step 4: Verify typecheck** — `npx tsc --noEmit` → PASS.
-- [ ] **Step 5: Commit** — `git add app/playlist/\[id\].tsx components/DownloadButton.tsx components/AddToPlaylistModal.tsx && git commit -m "feat(ui): console reskin playlist + download button + add-to-playlist modal"`
+- [x] **Step 1: `components/DownloadButton.tsx`** — read it; keep the state-prop API (`state`, `progress`, `onDownload`, `onPause`, `onResume`, `onDismiss`) and all branching unchanged. Reskin each state to tokens: `idle` → `ConsoleButton label="download"` ghost; `downloading`/`paused` → progress bar + `%` in mono (`COLORS.accent` active, `COLORS.secondary` paused) + pause/resume bracket; `done` → `[ saved ✓ ]` in `COLORS.secondary` (filled, glow); `error` → `[ failed · retry ]` in `COLORS.error`; `pausing` → spinner `COLORS.accent`.
+- [x] **Step 2: `components/AddToPlaylistModal.tsx`** — read it; keep all logic/props. Reskin modal surface `COLORS.surface`, border `COLORS.border`, mono header `[ add to playlist ]`, list rows mono, create-button `ConsoleButton accent`.
+- [x] **Step 3: `app/playlist/[id].tsx`** — read it; keep logic. Apply `ConsoleHeader path="playlist"` + playlist title, `TrackRow` list, `SectionHeader`, token colors.
+- [x] **Step 4: Verify typecheck** — `npx tsc --noEmit` → PASS.
+- [x] **Step 5: Commit** — `git add app/playlist/\[id\].tsx components/DownloadButton.tsx components/AddToPlaylistModal.tsx && git commit -m "feat(ui): console reskin playlist + download button + add-to-playlist modal"`
 
 ---
 
 ## Task 13: Full verification pass
 
-- [ ] **Step 1: Typecheck clean** — Run: `npx tsc --noEmit` → PASS (no errors across the project).
-- [ ] **Step 2: Grep for leftover legacy hex** — Run: `grep -rn "#ff5c2e\|#0e0c0a\|#f5efe3\|#a08a78\|#5a4d42\|#e8b67a" app components` → Expected: no results (all migrated to tokens). Fix any stragglers.
-- [ ] **Step 3: Device smoke test** — Run: `npx expo run:android`. Walk every tab + player + playlist. Confirm console look is coherent and all playback/download/favorite/lyrics behavior works. Note: the visualizer is still the placeholder (real FFT = Plan 2).
-- [ ] **Step 4: Final commit (if any stragglers fixed)** — `git add -A && git commit -m "chore(ui): migrate leftover hex to console tokens"`
+- [x] **Step 1: Typecheck clean** — Run: `npx tsc --noEmit` → PASS (no errors across the project).
+- [x] **Step 2: Grep for leftover legacy hex** — Run: `grep -rn "#ff5c2e\|#0e0c0a\|#f5efe3\|#a08a78\|#5a4d42\|#e8b67a" app components` → Expected: no results (all migrated to tokens). Fix any stragglers.
+- [ ] **Step 3: Device smoke test** — ⏳ USER RUNS THIS. Run: `npx expo run:android`. Walk every tab + player + playlist. Confirm console look is coherent and all playback/download/favorite/lyrics behavior works. Note: the visualizer is still the placeholder (real FFT = Plan 2).
+- [x] **Step 4: Final commit (if any stragglers fixed)** — `git add -A && git commit -m "chore(ui): migrate leftover hex to console tokens"`
 
 ---
 
