@@ -9,7 +9,7 @@ import SectionHeader from '../../components/ui/SectionHeader';
 import { getTrending, searchYouTube, type VideoInfo } from '../../services/youtube';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useLibraryStore } from '../../stores/libraryStore';
-import { COLORS, FONTS } from '../../constants/theme';
+import { useTheme } from '../../constants/theme';
 
 const MOODS = [
   { label: '#chill', query: 'chill vibes music' },
@@ -30,6 +30,7 @@ function toTrack(v: VideoInfo) {
 }
 
 export default function HomeScreen() {
+  const { colors, fonts } = useTheme();
   const router = useRouter();
   const [trending, setTrending] = useState<VideoInfo[]>([]);
   const [isLoadingTrending, setIsLoadingTrending] = useState(true);
@@ -75,7 +76,7 @@ export default function HomeScreen() {
   }, [loadTrending]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <ConsoleHeader path="discover" title="Discover" />
 
@@ -86,8 +87,8 @@ export default function HomeScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={COLORS.accent}
-              progressBackgroundColor={COLORS.surface}
+              tintColor={colors.accent}
+              progressBackgroundColor={colors.surface}
             />
           }
         >
@@ -104,17 +105,17 @@ export default function HomeScreen() {
                 }
                 activeOpacity={0.7}
                 style={{
-                  backgroundColor: COLORS.surface,
+                  backgroundColor: colors.surface,
                   borderRadius: 4,
                   paddingHorizontal: 12,
                   paddingVertical: 7,
                   borderWidth: 1,
-                  borderColor: COLORS.border,
+                  borderColor: colors.border,
                   marginRight: 8,
                   marginBottom: 8,
                 }}
               >
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.secondary }}>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.secondary }}>
                   {mood.label}
                 </Text>
               </TouchableOpacity>
@@ -193,8 +194,8 @@ export default function HomeScreen() {
 
             {isLoadingTrending && (
               <View style={{ alignItems: 'center', paddingVertical: 48 }}>
-                <ActivityIndicator color={COLORS.accent} size="small" />
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 12, letterSpacing: 1.4 }}>
+                <ActivityIndicator color={colors.accent} size="small" />
+                <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textFaint, marginTop: 12, letterSpacing: 1.4 }}>
                   LOADING...
                 </Text>
               </View>
@@ -202,7 +203,7 @@ export default function HomeScreen() {
 
             {trendingError && !isLoadingTrending && (
               <View style={{ alignItems: 'center', paddingVertical: 32, paddingHorizontal: 24 }}>
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.error, letterSpacing: 1 }}>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.error, letterSpacing: 1 }}>
                   ERR: fetch failed
                 </Text>
                 <TouchableOpacity
@@ -213,10 +214,10 @@ export default function HomeScreen() {
                     paddingVertical: 8,
                     borderRadius: 4,
                     borderWidth: 1,
-                    borderColor: COLORS.borderAccent,
+                    borderColor: colors.borderAccent,
                   }}
                 >
-                  <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.accent }}>
+                  <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.accent }}>
                     [ retry ]
                   </Text>
                 </TouchableOpacity>

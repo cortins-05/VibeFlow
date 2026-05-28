@@ -9,7 +9,7 @@ import { usePlayerStore } from '../stores/playerStore';
 import { useLibraryStore } from '../stores/libraryStore';
 import { useTrackDownload } from '../hooks/useTrackDownload';
 import { useLyrics } from '../hooks/useLyrics';
-import { COLORS, FONTS } from '../constants/theme';
+import { useTheme } from '../constants/theme';
 import TerminalArtwork from '../components/player/TerminalArtwork';
 import LyricsView from '../components/player/LyricsView';
 import ProgressScrub from '../components/player/ProgressScrub';
@@ -23,6 +23,7 @@ const ARTWORK_SIZE = SCREEN_WIDTH - 96;
 const SEEK_TRACK_WIDTH = SCREEN_WIDTH - 64;
 
 export default function PlayerScreen() {
+  const { colors, fonts } = useTheme();
   const router = useRouter();
   const { currentTrack, shuffle, repeat, setShuffle, setRepeat } = usePlayerStore();
   const { toggleFavorite, isFavorite } = useLibraryStore();
@@ -98,7 +99,7 @@ export default function PlayerScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar barStyle="light-content" />
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         {/* Header */}
@@ -108,15 +109,15 @@ export default function PlayerScreen() {
             style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             hitSlop={10}
           >
-            <ChevronDown color={COLORS.text} size={24} />
+            <ChevronDown color={colors.text} size={24} />
           </Pressable>
           <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
-              <Text style={{ color: COLORS.accent }}>$</Text> now_playing
+            <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>
+              <Text style={{ color: colors.accent }}>$</Text> now_playing
             </Text>
           </View>
           <Pressable onPress={() => setShowQueue(true)} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
-            <ListMusic color={COLORS.text} size={20} />
+            <ListMusic color={colors.text} size={20} />
           </Pressable>
         </View>
 
@@ -133,13 +134,13 @@ export default function PlayerScreen() {
         <View style={{ paddingHorizontal: 24, marginTop: 4, flex: 1, justifyContent: 'flex-end', paddingBottom: 16 }}>
           <View style={{ alignItems: 'center', paddingHorizontal: 8, marginBottom: 20 }}>
             <Text
-              style={{ fontFamily: FONTS.sans, fontSize: 28, lineHeight: 32, color: COLORS.text, textAlign: 'center' }}
+              style={{ fontFamily: fonts.sans, fontSize: 28, lineHeight: 32, color: colors.text, textAlign: 'center' }}
               numberOfLines={2}
             >
               {currentTrack.title}
             </Text>
             <Text
-              style={{ fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 1.4, color: COLORS.secondary, marginTop: 8 }}
+              style={{ fontFamily: fonts.mono, fontSize: 11, letterSpacing: 1.4, color: colors.secondary, marginTop: 8 }}
               numberOfLines={1}
             >
               {currentTrack.artist.toUpperCase()}

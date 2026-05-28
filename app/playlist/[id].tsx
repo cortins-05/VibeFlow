@@ -19,7 +19,7 @@ import SectionHeader from '../../components/ui/SectionHeader';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import type { PlaylistTrack } from '../../services/db';
-import { COLORS, FONTS, glow } from '../../constants/theme';
+import { useTheme, glow } from '../../constants/theme';
 
 function totalDuration(tracks: PlaylistTrack[]): string {
   const total = tracks.reduce((acc, t) => acc + (t.duration ?? 0), 0);
@@ -30,6 +30,7 @@ function totalDuration(tracks: PlaylistTrack[]): string {
 }
 
 export default function PlaylistScreen() {
+  const { colors, fonts } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const {
@@ -123,7 +124,7 @@ export default function PlaylistScreen() {
   const coverArt = tracks[0]?.artwork;
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         {/* Header */}
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4, justifyContent: 'space-between' }}>
@@ -132,11 +133,11 @@ export default function PlaylistScreen() {
             style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <ChevronLeft color={COLORS.text} size={22} />
+            <ChevronLeft color={colors.text} size={22} />
           </TouchableOpacity>
-          <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
-            vibeflow <Text style={{ color: COLORS.secondary }}>~/playlist</Text>{' '}
-            <Text style={{ color: COLORS.accent }}>$</Text>
+          <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>
+            vibeflow <Text style={{ color: colors.secondary }}>~/playlist</Text>{' '}
+            <Text style={{ color: colors.accent }}>$</Text>
           </Text>
           <View style={{ flexDirection: 'row' }}>
             <TouchableOpacity
@@ -144,14 +145,14 @@ export default function PlaylistScreen() {
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginRight: 4 }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Edit3 color={COLORS.textDim} size={15} strokeWidth={1.6} />
+              <Edit3 color={colors.textDim} size={15} strokeWidth={1.6} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleDelete}
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Trash2 color={COLORS.textFaint} size={16} strokeWidth={1.6} />
+              <Trash2 color={colors.textFaint} size={16} strokeWidth={1.6} />
             </TouchableOpacity>
           </View>
         </View>
@@ -175,7 +176,7 @@ export default function PlaylistScreen() {
                     height: 180,
                     borderRadius: 4,
                     borderWidth: 1,
-                    borderColor: COLORS.border,
+                    borderColor: colors.border,
                   }}
                   contentFit="cover"
                 />
@@ -185,25 +186,25 @@ export default function PlaylistScreen() {
                     width: 180,
                     height: 180,
                     borderRadius: 4,
-                    backgroundColor: COLORS.surface,
+                    backgroundColor: colors.surface,
                     borderWidth: 1,
-                    borderColor: COLORS.border,
+                    borderColor: colors.border,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
-                  <ListMusic color={COLORS.secondary} size={44} strokeWidth={1.4} />
+                  <ListMusic color={colors.secondary} size={44} strokeWidth={1.4} />
                 </View>
               )}
             </MotiView>
 
             <Text
-              style={{ fontFamily: FONTS.sans, fontSize: 28, lineHeight: 32, color: COLORS.text, marginTop: 24, textAlign: 'center' }}
+              style={{ fontFamily: fonts.sans, fontSize: 28, lineHeight: 32, color: colors.text, marginTop: 24, textAlign: 'center' }}
               numberOfLines={2}
             >
               {playlist?.name ?? 'Playlist'}
             </Text>
-            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim, marginTop: 6 }}>
+            <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim, marginTop: 6 }}>
               {tracks.length} tracks · {totalDuration(tracks)}
             </Text>
 
@@ -215,16 +216,16 @@ export default function PlaylistScreen() {
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  backgroundColor: COLORS.accent,
+                  backgroundColor: colors.accent,
                   paddingHorizontal: 20,
                   paddingVertical: 11,
                   borderRadius: 4,
                   marginRight: 10,
-                  ...glow(COLORS.accent, 8, 0.4),
+                  ...glow(colors.accent, 8, 0.4),
                 }}
               >
-                <Play color={COLORS.bg} size={14} fill={COLORS.bg} />
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.bg, marginLeft: 8, letterSpacing: 0.5 }}>
+                <Play color={colors.bg} size={14} fill={colors.bg} />
+                <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.bg, marginLeft: 8, letterSpacing: 0.5 }}>
                   PLAY
                 </Text>
               </TouchableOpacity>
@@ -238,11 +239,11 @@ export default function PlaylistScreen() {
                   paddingVertical: 11,
                   borderRadius: 4,
                   borderWidth: 1,
-                  borderColor: COLORS.border,
+                  borderColor: colors.border,
                 }}
               >
-                <Shuffle color={COLORS.textDim} size={14} strokeWidth={1.8} />
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim, marginLeft: 8, letterSpacing: 0.5 }}>
+                <Shuffle color={colors.textDim} size={14} strokeWidth={1.8} />
+                <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim, marginLeft: 8, letterSpacing: 0.5 }}>
                   SHUFFLE
                 </Text>
               </TouchableOpacity>
@@ -251,10 +252,10 @@ export default function PlaylistScreen() {
 
           {tracks.length === 0 && (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>
                 // empty playlist
               </Text>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 6 }}>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textFaint, marginTop: 6 }}>
                 search and add tracks
               </Text>
             </View>
@@ -274,7 +275,7 @@ export default function PlaylistScreen() {
                   style={{ opacity: i === 0 ? 0.2 : 1 }}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <ChevronUp color={COLORS.textFaint} size={14} strokeWidth={1.6} />
+                  <ChevronUp color={colors.textFaint} size={14} strokeWidth={1.6} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => { moveTrackInPlaylist(t.id, id!, 'down'); refreshTracks(); }}
@@ -282,7 +283,7 @@ export default function PlaylistScreen() {
                   style={{ opacity: i === tracks.length - 1 ? 0.2 : 1 }}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <ChevronDown color={COLORS.textFaint} size={14} strokeWidth={1.6} />
+                  <ChevronDown color={colors.textFaint} size={14} strokeWidth={1.6} />
                 </TouchableOpacity>
               </View>
               <View style={{ flex: 1 }}>
@@ -342,33 +343,33 @@ export default function PlaylistScreen() {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(11,12,11,0.88)' }}>
           <View
             style={{
-              backgroundColor: COLORS.surface,
+              backgroundColor: colors.surface,
               borderRadius: 6,
               padding: 24,
               marginHorizontal: 24,
               width: '100%',
               maxWidth: 360,
               borderWidth: 1,
-              borderColor: COLORS.borderAccent,
+              borderColor: colors.borderAccent,
             }}
           >
-            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1.8, color: COLORS.accent }}>
+            <Text style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: 1.8, color: colors.accent }}>
               RENAME · PLAYLIST
             </Text>
             <TextInput
               value={renameValue}
               onChangeText={setRenameValue}
               placeholder="playlist name"
-              placeholderTextColor={COLORS.textFaint}
+              placeholderTextColor={colors.textFaint}
               autoFocus
               onSubmitEditing={handleRename}
               style={{
-                fontFamily: FONTS.mono,
+                fontFamily: fonts.mono,
                 fontSize: 14,
-                color: COLORS.text,
+                color: colors.text,
                 paddingVertical: 10,
                 borderBottomWidth: 1,
-                borderBottomColor: COLORS.borderAccent,
+                borderBottomColor: colors.borderAccent,
                 marginTop: 12,
                 marginBottom: 20,
               }}
@@ -378,7 +379,7 @@ export default function PlaylistScreen() {
                 onPress={() => setShowRename(false)}
                 style={{ flex: 1, paddingVertical: 12, alignItems: 'center', marginRight: 8 }}
               >
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>CANCEL</Text>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>CANCEL</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleRename}
@@ -386,11 +387,11 @@ export default function PlaylistScreen() {
                   flex: 1,
                   paddingVertical: 12,
                   borderRadius: 4,
-                  backgroundColor: COLORS.accent,
+                  backgroundColor: colors.accent,
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.bg }}>RENAME</Text>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.bg }}>RENAME</Text>
               </TouchableOpacity>
             </View>
           </View>

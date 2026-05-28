@@ -4,7 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import { useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MiniPlayer from '../../components/MiniPlayer';
-import { COLORS, FONTS, glow } from '../../constants/theme';
+import { useTheme, glow } from '../../constants/theme';
 
 const TABS = [
   { name: 'index', label: 'discover' },
@@ -14,6 +14,7 @@ const TABS = [
 ] as const;
 
 function TabButton({ label, focused, onPress }: { label: string; focused: boolean; onPress: () => void }) {
+  const { colors, fonts } = useTheme();
   const scale = useSharedValue(focused ? 1 : 0.92);
   const indicator = useSharedValue(focused ? 1 : 0);
 
@@ -33,17 +34,17 @@ function TabButton({ label, focused, onPress }: { label: string; focused: boolea
       <Animated.View style={[wrap, { alignItems: 'center' }]}>
         <Text
           style={{
-            fontFamily: FONTS.mono,
+            fontFamily: fonts.mono,
             fontSize: 10,
             letterSpacing: 0.5,
-            color: focused ? COLORS.accent : COLORS.textFaint,
-            ...(focused ? glow(COLORS.accent, 6, 0.5) : {}),
+            color: focused ? colors.accent : colors.textFaint,
+            ...(focused ? glow(colors.accent, 6, 0.5) : {}),
           }}
         >
           {focused ? `[${label}]` : label}
         </Text>
         <Animated.View
-          style={[bar, { height: 2, borderRadius: 1, backgroundColor: COLORS.accent, marginTop: 4 }]}
+          style={[bar, { height: 2, borderRadius: 1, backgroundColor: colors.accent, marginTop: 4 }]}
         />
       </Animated.View>
     </Pressable>
@@ -52,17 +53,18 @@ function TabButton({ label, focused, onPress }: { label: string; focused: boolea
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Tabs
         screenOptions={{ headerShown: false }}
         tabBar={({ state, navigation }) => (
           <View
             style={{
               flexDirection: 'row',
-              backgroundColor: COLORS.bg,
+              backgroundColor: colors.bg,
               borderTopWidth: 1,
-              borderTopColor: COLORS.border,
+              borderTopColor: colors.border,
               height: 72 + insets.bottom,
               paddingBottom: 12 + insets.bottom,
             }}

@@ -9,9 +9,10 @@ import TrackActionsModal from '../../components/TrackActionsModal';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { useDownloadStore } from '../../stores/downloadStore';
 import { usePlayerStore } from '../../stores/playerStore';
-import { COLORS, FONTS } from '../../constants/theme';
+import { useTheme } from '../../constants/theme';
 
 export default function DownloadsScreen() {
+  const { colors, fonts } = useTheme();
   const router = useRouter();
   const { downloads, deleteDownload } = useDownloadStore();
   const { playQueue, currentTrack, addToQueue } = usePlayerStore();
@@ -33,18 +34,18 @@ export default function DownloadsScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
           <TouchableOpacity
             onPress={() => router.back()}
             style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
-            <ChevronLeft color={COLORS.text} size={22} />
+            <ChevronLeft color={colors.text} size={22} />
           </TouchableOpacity>
-          <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
-            vibeflow <Text style={{ color: COLORS.secondary }}>~/downloads</Text>{' '}
-            <Text style={{ color: COLORS.accent }}>$</Text>
+          <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>
+            vibeflow <Text style={{ color: colors.secondary }}>~/downloads</Text>{' '}
+            <Text style={{ color: colors.accent }}>$</Text>
           </Text>
         </View>
 
@@ -53,20 +54,20 @@ export default function DownloadsScreen() {
           contentContainerStyle={{ paddingBottom: 160 }}
         >
           <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 }}>
-            <Text style={{ fontFamily: FONTS.sansLight, fontSize: 36, lineHeight: 40, color: COLORS.text }}>
+            <Text style={{ fontFamily: fonts.sansLight, fontSize: 36, lineHeight: 40, color: colors.text }}>
               Downloads
             </Text>
-            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.secondary, marginTop: 6, letterSpacing: 0.5 }}>
+            <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.secondary, marginTop: 6, letterSpacing: 0.5 }}>
               {downloads.length} files · OFFLINE
             </Text>
           </View>
 
           {downloads.length === 0 && (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>
                 // no downloads
               </Text>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 6 }}>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textFaint, marginTop: 6 }}>
                 download songs from the player
               </Text>
             </View>
@@ -122,14 +123,14 @@ export default function DownloadsScreen() {
                 style={{ paddingRight: 4, paddingLeft: 8, paddingVertical: 16 }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Share2 color={COLORS.secondary} size={16} />
+                <Share2 color={colors.secondary} size={16} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => deleteDownload(d.video_id)}
                 style={{ paddingRight: 20, paddingLeft: 8, paddingVertical: 16 }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Trash2 color={COLORS.textFaint} size={16} />
+                <Trash2 color={colors.textFaint} size={16} />
               </TouchableOpacity>
             </View>
           ))}

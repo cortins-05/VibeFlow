@@ -6,9 +6,10 @@ import { useState, useEffect } from 'react';
 import ConsoleHeader from '../../components/ui/ConsoleHeader';
 import SectionHeader from '../../components/ui/SectionHeader';
 import StatusLine from '../../components/ui/StatusLine';
-import { COLORS, FONTS } from '../../constants/theme';
+import { useTheme } from '../../constants/theme';
 
 export default function SettingsScreen() {
+  const { colors, fonts } = useTheme();
   const [cacheSize, setCacheSize] = useState('0.0');
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <ConsoleHeader path="settings" title="Settings" />
 
@@ -57,27 +58,27 @@ export default function SettingsScreen() {
           <View
             style={{
               marginHorizontal: 20,
-              backgroundColor: COLORS.surface,
+              backgroundColor: colors.surface,
               borderRadius: 4,
               overflow: 'hidden',
               borderWidth: 1,
-              borderColor: COLORS.border,
+              borderColor: colors.border,
             }}
           >
             <SettingsRow
               glyph="≈"
-              glyphColor={COLORS.accent}
+              glyphColor={colors.accent}
               label="Equalizer"
               value="SOON"
-              valueColor={COLORS.textFaint}
+              valueColor={colors.textFaint}
             />
             <Divider />
             <SettingsRow
               glyph="◉"
-              glyphColor={COLORS.secondary}
+              glyphColor={colors.secondary}
               label="Audio Quality"
               value="HQ · adaptive"
-              valueColor={COLORS.secondary}
+              valueColor={colors.secondary}
             />
           </View>
 
@@ -86,20 +87,20 @@ export default function SettingsScreen() {
           <View
             style={{
               marginHorizontal: 20,
-              backgroundColor: COLORS.surface,
+              backgroundColor: colors.surface,
               borderRadius: 4,
               overflow: 'hidden',
               borderWidth: 1,
-              borderColor: COLORS.border,
+              borderColor: colors.border,
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 }}>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 16, color: COLORS.textDim, width: 28 }}>⊙</Text>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 16, color: colors.textDim, width: 28 }}>⊙</Text>
               <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={{ fontFamily: FONTS.sans, fontSize: 16, lineHeight: 20, color: COLORS.text }}>
+                <Text style={{ fontFamily: fonts.sans, fontSize: 16, lineHeight: 20, color: colors.text }}>
                   Cache
                 </Text>
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim, marginTop: 2 }}>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim, marginTop: 2 }}>
                   {cacheSize} MB
                 </Text>
               </View>
@@ -110,10 +111,10 @@ export default function SettingsScreen() {
                   paddingVertical: 7,
                   borderRadius: 4,
                   borderWidth: 1,
-                  borderColor: COLORS.border,
+                  borderColor: colors.border,
                 }}
               >
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim }}>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim }}>
                   [ clear ]
                 </Text>
               </TouchableOpacity>
@@ -125,26 +126,26 @@ export default function SettingsScreen() {
           <View
             style={{
               marginHorizontal: 20,
-              backgroundColor: COLORS.surface,
+              backgroundColor: colors.surface,
               borderRadius: 4,
               overflow: 'hidden',
               borderWidth: 1,
-              borderColor: COLORS.border,
+              borderColor: colors.border,
             }}
           >
             <SettingsRow
               glyph="ℹ"
-              glyphColor={COLORS.textDim}
+              glyphColor={colors.textDim}
               label="VibeFlow"
               value="v1.0.0"
-              valueColor={COLORS.textFaint}
+              valueColor={colors.textFaint}
             />
           </View>
 
           <View style={{ marginTop: 32, paddingHorizontal: 20 }}>
             <StatusLine
               segments={[
-                { text: 'vibeflow', color: COLORS.secondary },
+                { text: 'vibeflow', color: colors.secondary },
                 { text: ' · v1.0.0 · android' },
               ]}
             />
@@ -168,13 +169,14 @@ function SettingsRow({
   value: string;
   valueColor: string;
 }) {
+  const { colors, fonts } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 }}>
-      <Text style={{ fontFamily: FONTS.mono, fontSize: 16, color: glyphColor, width: 28 }}>{glyph}</Text>
-      <Text style={{ flex: 1, fontFamily: FONTS.sans, fontSize: 16, lineHeight: 20, color: COLORS.text, marginLeft: 12 }}>
+      <Text style={{ fontFamily: fonts.mono, fontSize: 16, color: glyphColor, width: 28 }}>{glyph}</Text>
+      <Text style={{ flex: 1, fontFamily: fonts.sans, fontSize: 16, lineHeight: 20, color: colors.text, marginLeft: 12 }}>
         {label}
       </Text>
-      <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: valueColor, letterSpacing: 0.5 }}>
+      <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: valueColor, letterSpacing: 0.5 }}>
         {value}
       </Text>
     </View>
@@ -182,7 +184,8 @@ function SettingsRow({
 }
 
 function Divider() {
+  const { colors } = useTheme();
   return (
-    <View style={{ height: 1, backgroundColor: COLORS.border, marginHorizontal: 16 }} />
+    <View style={{ height: 1, backgroundColor: colors.border, marginHorizontal: 16 }} />
   );
 }

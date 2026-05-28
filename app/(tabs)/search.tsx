@@ -19,7 +19,7 @@ import SectionHeader from '../../components/ui/SectionHeader';
 import { searchYouTube, type VideoInfo } from '../../services/youtube';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useLibraryStore } from '../../stores/libraryStore';
-import { COLORS, FONTS } from '../../constants/theme';
+import { useTheme } from '../../constants/theme';
 
 const VIBES = ['chill', 'focus', 'hype', 'late night', 'sunset drive', 'lo-fi'];
 
@@ -35,6 +35,7 @@ function toTrack(v: VideoInfo) {
 }
 
 export default function SearchScreen() {
+  const { colors, fonts } = useTheme();
   const params = useLocalSearchParams<{ q?: string }>();
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
@@ -74,7 +75,7 @@ export default function SearchScreen() {
   }, [params.q]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
           <ConsoleHeader path="search" title="Search" />
@@ -85,14 +86,14 @@ export default function SearchScreen() {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                backgroundColor: COLORS.surface,
+                backgroundColor: colors.surface,
                 borderRadius: 4,
                 borderWidth: 1,
-                borderColor: focused ? COLORS.borderAccent : COLORS.border,
+                borderColor: focused ? colors.borderAccent : colors.border,
                 paddingHorizontal: 12,
               }}
             >
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 14, color: COLORS.accent, marginRight: 8 }}>{'>'}</Text>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 14, color: colors.accent, marginRight: 8 }}>{'>'}</Text>
               <TextInput
                 value={query}
                 onChangeText={(t) => {
@@ -102,12 +103,12 @@ export default function SearchScreen() {
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 placeholder="type to search..."
-                placeholderTextColor={COLORS.textFaint}
+                placeholderTextColor={colors.textFaint}
                 style={{
                   flex: 1,
-                  fontFamily: FONTS.mono,
+                  fontFamily: fonts.mono,
                   fontSize: 13,
-                  color: COLORS.text,
+                  color: colors.text,
                   paddingVertical: 12,
                 }}
                 returnKeyType="search"
@@ -123,7 +124,7 @@ export default function SearchScreen() {
                   }}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                  <X color={COLORS.textDim} size={14} />
+                  <X color={colors.textDim} size={14} />
                 </TouchableOpacity>
               )}
             </View>
@@ -143,7 +144,7 @@ export default function SearchScreen() {
 
                 {isSearching && (
                   <View style={{ alignItems: 'center', paddingVertical: 48 }}>
-                    <ActivityIndicator color={COLORS.accent} size="small" />
+                    <ActivityIndicator color={colors.accent} size="small" />
                   </View>
                 )}
 
@@ -191,10 +192,10 @@ export default function SearchScreen() {
 
                 {!isSearching && results.length === 0 && query.trim() !== '' && (
                   <View style={{ alignItems: 'center', paddingVertical: 48 }}>
-                    <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim, letterSpacing: 1 }}>
+                    <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim, letterSpacing: 1 }}>
                       // no results
                     </Text>
-                    <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 6 }}>
+                    <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textFaint, marginTop: 6 }}>
                       try a different query
                     </Text>
                   </View>
@@ -215,17 +216,17 @@ export default function SearchScreen() {
                       }}
                       activeOpacity={0.7}
                       style={{
-                        backgroundColor: COLORS.surface,
+                        backgroundColor: colors.surface,
                         borderRadius: 4,
                         paddingHorizontal: 12,
                         paddingVertical: 7,
                         borderWidth: 1,
-                        borderColor: COLORS.border,
+                        borderColor: colors.border,
                         marginRight: 8,
                         marginBottom: 8,
                       }}
                     >
-                      <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.secondary }}>
+                      <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.secondary }}>
                         #{mood.replace(' ', '_')}
                       </Text>
                     </TouchableOpacity>

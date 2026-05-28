@@ -16,9 +16,10 @@ import ConsoleHeader from '../../components/ui/ConsoleHeader';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { useDownloadStore } from '../../stores/downloadStore';
-import { COLORS, FONTS, glow } from '../../constants/theme';
+import { useTheme, glow } from '../../constants/theme';
 
 export default function LibraryScreen() {
+  const { colors, fonts } = useTheme();
   const router = useRouter();
   const { playlists, createPlaylist, history, favorites } = useLibraryStore();
   const { downloads, loadDownloads } = useDownloadStore();
@@ -35,7 +36,7 @@ export default function LibraryScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingRight: 20 }}>
           <ConsoleHeader path="library" title="Library" />
@@ -48,14 +49,14 @@ export default function LibraryScreen() {
               paddingVertical: 8,
               borderRadius: 4,
               borderWidth: 1,
-              borderColor: COLORS.borderAccent,
+              borderColor: colors.borderAccent,
               flexDirection: 'row',
               alignItems: 'center',
-              ...glow(COLORS.accent, 4, 0.3),
+              ...glow(colors.accent, 4, 0.3),
             }}
           >
-            <Plus color={COLORS.accent} size={14} strokeWidth={2} />
-            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.accent, marginLeft: 6 }}>
+            <Plus color={colors.accent} size={14} strokeWidth={2} />
+            <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.accent, marginLeft: 6 }}>
               new
             </Text>
           </TouchableOpacity>
@@ -95,10 +96,10 @@ export default function LibraryScreen() {
 
             {playlists.length === 0 && (
               <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>
                   // no playlists
                 </Text>
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 6 }}>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textFaint, marginTop: 6 }}>
                   tap [new] to start collecting
                 </Text>
               </View>
@@ -120,10 +121,10 @@ export default function LibraryScreen() {
                     paddingVertical: 14,
                     paddingHorizontal: 20,
                     borderBottomWidth: 1,
-                    borderBottomColor: COLORS.border,
+                    borderBottomColor: colors.border,
                   }}
                 >
-                  <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textFaint, width: 22 }}>
+                  <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textFaint, width: 22 }}>
                     {String(i + 1).padStart(2, '0')}
                   </Text>
                   <View
@@ -132,32 +133,32 @@ export default function LibraryScreen() {
                       width: 40,
                       height: 40,
                       borderRadius: 4,
-                      backgroundColor: COLORS.surface,
+                      backgroundColor: colors.surface,
                       alignItems: 'center',
                       justifyContent: 'center',
                       borderWidth: 1,
-                      borderColor: COLORS.border,
+                      borderColor: colors.border,
                     }}
                   >
-                    <ListMusic color={COLORS.secondary} size={18} strokeWidth={1.6} />
+                    <ListMusic color={colors.secondary} size={18} strokeWidth={1.6} />
                   </View>
                   <View style={{ flex: 1, marginLeft: 12, minWidth: 0 }}>
                     <Text
-                      style={{ fontFamily: FONTS.sans, fontSize: 18, lineHeight: 22, color: COLORS.text }}
+                      style={{ fontFamily: fonts.sans, fontSize: 18, lineHeight: 22, color: colors.text }}
                       numberOfLines={1}
                     >
                       {pl.name}
                     </Text>
                     {pl.description ? (
                       <Text
-                        style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim, marginTop: 2 }}
+                        style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim, marginTop: 2 }}
                         numberOfLines={1}
                       >
                         {pl.description}
                       </Text>
                     ) : null}
                   </View>
-                  <ChevronRight color={COLORS.textFaint} size={16} />
+                  <ChevronRight color={colors.textFaint} size={16} />
                 </TouchableOpacity>
               </MotiView>
             ))}
@@ -177,36 +178,36 @@ export default function LibraryScreen() {
         >
           <View
             style={{
-              backgroundColor: COLORS.surface,
+              backgroundColor: colors.surface,
               borderRadius: 6,
               padding: 24,
               marginHorizontal: 24,
               width: '100%',
               maxWidth: 360,
               borderWidth: 1,
-              borderColor: COLORS.borderAccent,
+              borderColor: colors.borderAccent,
             }}
           >
-            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1.8, color: COLORS.accent }}>
+            <Text style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: 1.8, color: colors.accent }}>
               NEW · PLAYLIST
             </Text>
-            <Text style={{ fontFamily: FONTS.sans, fontSize: 28, lineHeight: 32, color: COLORS.text, marginTop: 6, marginBottom: 16 }}>
+            <Text style={{ fontFamily: fonts.sans, fontSize: 28, lineHeight: 32, color: colors.text, marginTop: 6, marginBottom: 16 }}>
               Name it.
             </Text>
             <TextInput
               value={playlistName}
               onChangeText={setPlaylistName}
               placeholder="e.g. late_night_drive"
-              placeholderTextColor={COLORS.textFaint}
+              placeholderTextColor={colors.textFaint}
               autoFocus
               onSubmitEditing={handleCreate}
               style={{
-                fontFamily: FONTS.mono,
+                fontFamily: fonts.mono,
                 fontSize: 14,
-                color: COLORS.text,
+                color: colors.text,
                 paddingVertical: 10,
                 borderBottomWidth: 1,
-                borderBottomColor: COLORS.borderAccent,
+                borderBottomColor: colors.borderAccent,
                 marginBottom: 20,
               }}
             />
@@ -215,7 +216,7 @@ export default function LibraryScreen() {
                 onPress={() => setShowCreate(false)}
                 style={{ flex: 1, paddingVertical: 12, alignItems: 'center', marginRight: 8 }}
               >
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 1.4, color: COLORS.textDim }}>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 11, letterSpacing: 1.4, color: colors.textDim }}>
                   CANCEL
                 </Text>
               </TouchableOpacity>
@@ -225,11 +226,11 @@ export default function LibraryScreen() {
                   flex: 1,
                   paddingVertical: 12,
                   borderRadius: 4,
-                  backgroundColor: COLORS.accent,
+                  backgroundColor: colors.accent,
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 1.4, color: COLORS.bg }}>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 11, letterSpacing: 1.4, color: colors.bg }}>
                   CREATE
                 </Text>
               </TouchableOpacity>
@@ -256,7 +257,8 @@ function PinnedCard({
   cyan?: boolean;
   onPress?: () => void;
 }) {
-  const color = accent ? COLORS.accent : cyan ? COLORS.secondary : COLORS.textDim;
+  const { colors, fonts } = useTheme();
+  const color = accent ? colors.accent : cyan ? colors.secondary : colors.textDim;
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -264,24 +266,24 @@ function PinnedCard({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.surface,
+        backgroundColor: colors.surface,
         borderRadius: 4,
         paddingHorizontal: 16,
         paddingVertical: 14,
         borderWidth: 1,
-        borderColor: accent ? COLORS.borderAccent : COLORS.border,
+        borderColor: accent ? colors.borderAccent : colors.border,
       }}
     >
-      <Text style={{ fontFamily: FONTS.mono, fontSize: 18, color, width: 28 }}>{glyph}</Text>
+      <Text style={{ fontFamily: fonts.mono, fontSize: 18, color, width: 28 }}>{glyph}</Text>
       <View style={{ flex: 1, marginLeft: 12 }}>
-        <Text style={{ fontFamily: FONTS.sans, fontSize: 18, lineHeight: 22, color: COLORS.text }}>
+        <Text style={{ fontFamily: fonts.sans, fontSize: 18, lineHeight: 22, color: colors.text }}>
           {label}
         </Text>
-        <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim, marginTop: 2 }}>
+        <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim, marginTop: 2 }}>
           {count} tracks
         </Text>
       </View>
-      <ChevronRight color={COLORS.textFaint} size={16} />
+      <ChevronRight color={colors.textFaint} size={16} />
     </TouchableOpacity>
   );
 }

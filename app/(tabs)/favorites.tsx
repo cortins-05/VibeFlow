@@ -8,27 +8,28 @@ import TrackActionsModal from '../../components/TrackActionsModal';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { usePlayerStore } from '../../stores/playerStore';
-import { COLORS, FONTS } from '../../constants/theme';
+import { useTheme } from '../../constants/theme';
 
 export default function FavoritesScreen() {
+  const { colors, fonts } = useTheme();
   const router = useRouter();
   const { favoriteTracks } = useLibraryStore();
   const { playQueue, currentTrack, addToQueue } = usePlayerStore();
   const [actionTrack, setActionTrack] = useState<{ id: string; videoId: string; title: string; artist: string; artwork?: string; duration: number } | null>(null);
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
           <TouchableOpacity
             onPress={() => router.back()}
             style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
           >
-            <ChevronLeft color={COLORS.text} size={22} />
+            <ChevronLeft color={colors.text} size={22} />
           </TouchableOpacity>
-          <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
-            vibeflow <Text style={{ color: COLORS.secondary }}>~/favorites</Text>{' '}
-            <Text style={{ color: COLORS.accent }}>$</Text>
+          <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>
+            vibeflow <Text style={{ color: colors.secondary }}>~/favorites</Text>{' '}
+            <Text style={{ color: colors.accent }}>$</Text>
           </Text>
         </View>
 
@@ -37,20 +38,20 @@ export default function FavoritesScreen() {
           contentContainerStyle={{ paddingBottom: 160 }}
         >
           <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 }}>
-            <Text style={{ fontFamily: FONTS.sansLight, fontSize: 36, lineHeight: 40, color: COLORS.text }}>
+            <Text style={{ fontFamily: fonts.sansLight, fontSize: 36, lineHeight: 40, color: colors.text }}>
               Favorites
             </Text>
-            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.secondary, marginTop: 6, letterSpacing: 0.5 }}>
+            <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.secondary, marginTop: 6, letterSpacing: 0.5 }}>
               {favoriteTracks.length} tracks · SAVED ✓
             </Text>
           </View>
 
           {favoriteTracks.length === 0 && (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>
                 // no favorites yet
               </Text>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 6 }}>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textFaint, marginTop: 6 }}>
                 tap ♥ to save tracks
               </Text>
             </View>

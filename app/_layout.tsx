@@ -9,7 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import TrackPlayer, { Event } from 'react-native-track-player';
 import { StatusBar } from 'expo-status-bar';
 import { PlaybackService, setupPlayer } from '../services/trackPlayerService';
-import { COLORS } from '../constants/theme';
+import { useTheme } from '../constants/theme';
 import { initDatabase } from '../services/db';
 import { useLibraryStore } from '../stores/libraryStore';
 import { usePlayerStore } from '../stores/playerStore';
@@ -46,6 +46,7 @@ TrackPlayer.registerPlaybackService(() => PlaybackService);
 export default function RootLayout() {
   const loadLibrary = useLibraryStore((s) => s.loadLibrary);
   const loadDownloads = useDownloadStore((s) => s.loadDownloads);
+  const { colors } = useTheme();
   const [fontsLoaded] = useFonts({
     Fraunces_400Regular,
     Fraunces_700Bold,
@@ -116,12 +117,12 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <StatusBar style="light" />
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: COLORS.bg },
+            contentStyle: { backgroundColor: colors.bg },
           }}
         >
           <Stack.Screen name="(tabs)" />
