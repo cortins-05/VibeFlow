@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { View, Text, Pressable } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useEffect } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MiniPlayer from '../../components/MiniPlayer';
 import { COLORS, FONTS, glow } from '../../constants/theme';
 
@@ -50,6 +51,7 @@ function TabButton({ label, focused, onPress }: { label: string; focused: boolea
 }
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
       <Tabs
@@ -61,8 +63,8 @@ export default function TabLayout() {
               backgroundColor: COLORS.bg,
               borderTopWidth: 1,
               borderTopColor: COLORS.border,
-              height: 72,
-              paddingBottom: 12,
+              height: 72 + insets.bottom,
+              paddingBottom: 12 + insets.bottom,
             }}
           >
             {state.routes.map((route, i) => {

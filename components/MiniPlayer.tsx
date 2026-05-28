@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Play, Pause, SkipForward } from 'lucide-react-native';
 import TrackPlayer, { usePlaybackState, useProgress, State } from 'react-native-track-player';
 import { usePlayerStore } from '../stores/playerStore';
@@ -16,6 +17,7 @@ function fmt(s: number) {
 
 const MiniPlayer = memo(function MiniPlayer() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { currentTrack, isPlayerVisible } = usePlayerStore();
   const playbackState = usePlaybackState();
   const progress = useProgress();
@@ -40,7 +42,7 @@ const MiniPlayer = memo(function MiniPlayer() {
 
   return (
     <Animated.View
-      style={[animStyle, { position: 'absolute', bottom: 78, left: 0, right: 0, zIndex: 50 }]}
+      style={[animStyle, { position: 'absolute', bottom: 78 + insets.bottom, left: 0, right: 0, zIndex: 50 }]}
     >
       <Pressable onPress={() => router.push('/player')}>
         <View
