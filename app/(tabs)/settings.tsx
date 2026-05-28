@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import ConsoleHeader from '../../components/ui/ConsoleHeader';
 import SectionHeader from '../../components/ui/SectionHeader';
 import StatusLine from '../../components/ui/StatusLine';
+import ThemeSelector from '../../components/ThemeSelector';
 import { useTheme } from '../../constants/theme';
 
 export default function SettingsScreen() {
@@ -53,6 +54,21 @@ export default function SettingsScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 160 }}
         >
+          {/* Appearance */}
+          <SectionHeader label="appearance" />
+          <View
+            style={{
+              marginHorizontal: 20,
+              backgroundColor: colors.surface,
+              borderRadius: 4,
+              overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: colors.border,
+            }}
+          >
+            <ThemeSelector />
+          </View>
+
           {/* Audio */}
           <SectionHeader label="audio" />
           <View
