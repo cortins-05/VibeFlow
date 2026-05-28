@@ -8,14 +8,13 @@ import {
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, ListMusic, Heart, Clock, Download, ChevronRight, Upload } from 'lucide-react-native';
+import { Plus, ListMusic, Heart, Clock, Download, ChevronRight } from 'lucide-react-native';
 import { MotiView } from 'moti';
 import { useRouter } from 'expo-router';
-import * as DocumentPicker from 'expo-document-picker';
 import TrackRow from '../../components/TrackRow';
 import ConsoleHeader from '../../components/ui/ConsoleHeader';
 import SectionHeader from '../../components/ui/SectionHeader';
-import ImportReviewModal from '../../components/ImportReviewModal';
+import ImportTrigger from '../../components/ImportTrigger';
 import { useLibraryStore } from '../../stores/libraryStore';
 import { useDownloadStore } from '../../stores/downloadStore';
 import { useTheme, glow } from '../../constants/theme';
@@ -27,10 +26,6 @@ export default function LibraryScreen() {
   const { downloads, loadDownloads } = useDownloadStore();
   const [showCreate, setShowCreate] = useState(false);
   const [playlistName, setPlaylistName] = useState('');
-  const [importUri, setImportUri] = useState('');
-  const [importName, setImportName] = useState('');
-  const [showImport, setShowImport] = useState(false);
-
   useEffect(() => { loadDownloads(); }, []);
 
   function handleCreate() {
@@ -40,49 +35,13 @@ export default function LibraryScreen() {
     setShowCreate(false);
   }
 
-  async function handleImport() {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: ['text/csv', 'text/plain', 'application/json', '*/*'],
-        copyToCacheDirectory: true,
-      });
-      if (result.canceled || !result.assets?.[0]) return;
-
-      const uri = result.assets[0].uri;
-      const name = uri.split('/').pop()?.replace(/\.[^.]+$/, '') || 'Imported Playlist';
-
-      setImportUri(uri);
-      setImportName(name);
-      setShowImport(true);
-    } catch {
-      // silent fail — picker handles its own errors
-    }
-  }
-
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingRight: 20 }}>
           <ConsoleHeader path="library" title="Library" />
           <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-            <TouchableOpacity
-              onPress={handleImport}
-              activeOpacity={0.8}
-              style={{
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                borderRadius: 4,
-                borderWidth: 1,
-                borderColor: colors.border,
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <Upload color={colors.textDim} size={14} strokeWidth={2} />
-              <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim, marginLeft: 6 }}>
-                import
-              </Text>
-            </TouchableOpacity>
+            <ImportTrigger compact />
             <TouchableOpacity
               onPress={() => setShowCreate(true)}
               activeOpacity={0.8}
@@ -281,12 +240,6 @@ export default function LibraryScreen() {
           </View>
         </View>
       </Modal>
-      <ImportReviewModal
-        visible={showImport}
-        fileUri={importUri}
-        defaultName={importName}
-        onClose={() => setShowImport(false)}
-      />
     </View>
   );
 }
