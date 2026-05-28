@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Download, Pause, Play } from 'lucide-react-native';
-import { COLORS, FONTS } from '../constants/theme';
+import { useTheme } from '../constants/theme';
 
 interface Props {
   state: 'idle' | 'downloading' | 'pausing' | 'paused' | 'done' | 'error';
@@ -13,6 +13,7 @@ interface Props {
 }
 
 export default function DownloadButton({ state, progress, onDownload, onPause, onResume, onDismiss }: Props) {
+  const { colors, fonts } = useTheme();
   if (state === 'idle') {
     return (
       <TouchableOpacity
@@ -24,12 +25,12 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
           paddingVertical: 7,
           borderRadius: 4,
           borderWidth: 1,
-          borderColor: COLORS.border,
+          borderColor: colors.border,
           marginLeft: 8,
         }}
       >
-        <Download color={COLORS.textDim} size={12} />
-        <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim, marginLeft: 6 }}>
+        <Download color={colors.textDim} size={12} />
+        <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim, marginLeft: 6 }}>
           [ dl ]
         </Text>
       </TouchableOpacity>
@@ -40,17 +41,17 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
         <View style={{ width: 100 }}>
-          <View style={{ height: 3, backgroundColor: COLORS.border, borderRadius: 1, overflow: 'hidden' }}>
+          <View style={{ height: 3, backgroundColor: colors.border, borderRadius: 1, overflow: 'hidden' }}>
             <Animated.View
               style={{
                 height: '100%',
                 width: `${(progress ?? 0) * 100}%`,
-                backgroundColor: COLORS.accent,
+                backgroundColor: colors.accent,
                 borderRadius: 1,
               }}
             />
           </View>
-          <Text style={{ fontFamily: FONTS.mono, fontSize: 9, color: COLORS.textDim, marginTop: 3, textAlign: 'center' }}>
+          <Text style={{ fontFamily: fonts.mono, fontSize: 9, color: colors.textDim, marginTop: 3, textAlign: 'center' }}>
             {Math.round((progress ?? 0) * 100)}%
           </Text>
         </View>
@@ -65,14 +66,14 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
             marginLeft: 8,
             borderRadius: 4,
             borderWidth: 1,
-            borderColor: COLORS.border,
+            borderColor: colors.border,
           }}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           {state === 'pausing' ? (
-            <ActivityIndicator size="small" color={COLORS.textDim} />
+            <ActivityIndicator size="small" color={colors.textDim} />
           ) : (
-            <Pause color={COLORS.textDim} size={12} />
+            <Pause color={colors.textDim} size={12} />
           )}
         </TouchableOpacity>
       </View>
@@ -83,17 +84,17 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
         <View style={{ width: 100 }}>
-          <View style={{ height: 3, backgroundColor: COLORS.border, borderRadius: 1, overflow: 'hidden' }}>
+          <View style={{ height: 3, backgroundColor: colors.border, borderRadius: 1, overflow: 'hidden' }}>
             <Animated.View
               style={{
                 height: '100%',
                 width: `${(progress ?? 0) * 100}%`,
-                backgroundColor: COLORS.textDim,
+                backgroundColor: colors.textDim,
                 borderRadius: 1,
               }}
             />
           </View>
-          <Text style={{ fontFamily: FONTS.mono, fontSize: 9, color: COLORS.textDim, marginTop: 3, textAlign: 'center' }}>
+          <Text style={{ fontFamily: fonts.mono, fontSize: 9, color: colors.textDim, marginTop: 3, textAlign: 'center' }}>
             PAUSED
           </Text>
         </View>
@@ -107,11 +108,11 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
             marginLeft: 8,
             borderRadius: 4,
             borderWidth: 1,
-            borderColor: COLORS.borderAccent,
+            borderColor: colors.borderAccent,
           }}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Play color={COLORS.accent} size={12} fill={COLORS.accent} />
+          <Play color={colors.accent} size={12} fill={colors.accent} />
         </TouchableOpacity>
       </View>
     );
@@ -135,7 +136,7 @@ export default function DownloadButton({ state, progress, onDownload, onPause, o
         marginLeft: 8,
       }}
     >
-      <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.error }}>
+      <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.error }}>
         ERR · retry
       </Text>
     </TouchableOpacity>

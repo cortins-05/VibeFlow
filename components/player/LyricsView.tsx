@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView } from 'moti';
-import { COLORS, FONTS } from '../../constants/theme';
+import { useTheme } from '../../constants/theme';
 import type { LyricLine } from '../../services/lyrics';
 
 export default function LyricsView({
@@ -14,6 +14,7 @@ export default function LyricsView({
   activeLyricIdx: number;
   height: number;
 }) {
+  const { colors, fonts } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -28,8 +29,8 @@ export default function LyricsView({
         borderRadius: 4,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: COLORS.border,
-        backgroundColor: COLORS.surface,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
       }}
     >
       <LinearGradient
@@ -49,7 +50,7 @@ export default function LyricsView({
                     width: isActive ? 8 : 4,
                     height: isActive ? 8 : 4,
                     borderRadius: isActive ? 4 : 2,
-                    backgroundColor: isActive ? COLORS.accent : isPast ? COLORS.textFaint : COLORS.textDim,
+                    backgroundColor: isActive ? colors.accent : isPast ? colors.textFaint : colors.textDim,
                   }}
                 />
                 {i < lyrics.length - 1 ? (
@@ -58,7 +59,7 @@ export default function LyricsView({
                       width: 1,
                       flex: 1,
                       minHeight: 20,
-                      backgroundColor: isPast ? 'rgba(229,255,58,0.15)' : COLORS.border,
+                      backgroundColor: isPast ? 'rgba(229,255,58,0.15)' : colors.border,
                     }}
                   />
                 ) : null}
@@ -77,9 +78,9 @@ export default function LyricsView({
                       top: -2,
                       bottom: -2,
                       width: 2,
-                      backgroundColor: COLORS.accent,
+                      backgroundColor: colors.accent,
                       borderRadius: 1,
-                      shadowColor: COLORS.accent,
+                      shadowColor: colors.accent,
                       shadowOffset: { width: 0, height: 0 },
                       shadowOpacity: 0.6,
                       shadowRadius: 6,
@@ -89,10 +90,10 @@ export default function LyricsView({
                 ) : null}
                 <Text
                   style={{
-                    fontFamily: isActive ? FONTS.sans : FONTS.sansReg,
+                    fontFamily: isActive ? fonts.sans : fonts.sansReg,
                     fontSize: isActive ? 22 : 15,
                     lineHeight: isActive ? 28 : 22,
-                    color: isActive ? COLORS.text : isPast ? COLORS.textFaint : COLORS.textDim,
+                    color: isActive ? colors.text : isPast ? colors.textFaint : colors.textDim,
                     textAlign: 'left',
                     letterSpacing: isActive ? 0.3 : 0.1,
                   }}

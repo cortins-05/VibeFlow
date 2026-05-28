@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming } from 'react-native-reanimated';
-import { COLORS, glow } from '../../constants/theme';
+import { useTheme, glow } from '../../constants/theme';
 
-export default function Caret({ size = 16, color = COLORS.accent }: { size?: number; color?: string }) {
+export default function Caret({ size = 16, color: colorProp }: { size?: number; color?: string }) {
+  const { colors } = useTheme();
+  const color = colorProp ?? colors.accent;
   const op = useSharedValue(1);
   useEffect(() => {
     op.value = withRepeat(withTiming(0.15, { duration: 600 }), -1, true);

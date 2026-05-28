@@ -1,5 +1,5 @@
 import { View, Text, type ViewStyle } from 'react-native';
-import { COLORS, FONTS } from '../../constants/theme';
+import { useTheme } from '../../constants/theme';
 
 export default function StatusLine({
   segments,
@@ -8,10 +8,11 @@ export default function StatusLine({
   segments: { text: string; color?: string }[];
   style?: ViewStyle;
 }) {
+  const { colors, fonts } = useTheme();
   return (
     <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
       {segments.map((s, i) => (
-        <Text key={i} style={{ fontFamily: FONTS.mono, fontSize: 11, color: s.color ?? COLORS.textDim }}>
+        <Text key={i} style={{ fontFamily: fonts.mono, fontSize: 11, color: s.color ?? colors.textDim }}>
           {i > 0 ? '  ·  ' : ''}
           {s.text}
         </Text>

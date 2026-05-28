@@ -5,7 +5,7 @@ import { Heart, MoreVertical, Pause, ListMusic, Trash2 } from 'lucide-react-nati
 import { MotiView } from 'moti';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import type { VideoInfo } from '../services/youtube';
-import { COLORS, FONTS } from '../constants/theme';
+import { useTheme } from '../constants/theme';
 
 interface Props {
   track: VideoInfo;
@@ -42,6 +42,7 @@ const TrackRow = memo(function TrackRow({
   onSwipeRight,
   onSwipeLeft,
 }: Props) {
+  const { colors, fonts } = useTheme();
   const numeral = String((index ?? 0) + 1).padStart(2, '0');
   const swipeableRef = useRef<any>(null);
   const hasSwipe = !!onSwipeRight || !!onSwipeLeft;
@@ -62,16 +63,16 @@ const TrackRow = memo(function TrackRow({
             }}
             activeOpacity={0.85}
             style={{
-              backgroundColor: COLORS.accent,
+              backgroundColor: colors.accent,
               width: ACTION_WIDTH,
               height: '100%',
               justifyContent: 'center',
               alignItems: 'center',
             }}
           >
-            <ListMusic color={COLORS.bg} size={18} />
+            <ListMusic color={colors.bg} size={18} />
             <Text
-              style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.bg, marginTop: 4 }}
+              style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.bg, marginTop: 4 }}
             >
               add to queue
             </Text>
@@ -107,7 +108,7 @@ const TrackRow = memo(function TrackRow({
           >
             <Trash2 color="#fff" size={18} />
             <Text
-              style={{ fontFamily: FONTS.mono, fontSize: 10, color: '#fff', marginTop: 4 }}
+              style={{ fontFamily: fonts.mono, fontSize: 10, color: '#fff', marginTop: 4 }}
             >
               remove
             </Text>
@@ -130,16 +131,16 @@ const TrackRow = memo(function TrackRow({
             ? {
                 backgroundColor: 'rgba(229,255,58,0.05)',
                 borderLeftWidth: 2,
-                borderLeftColor: COLORS.accent,
+                borderLeftColor: colors.accent,
               }
             : { borderLeftWidth: 2, borderLeftColor: 'transparent' }
         }
       >
         <Text
           style={{
-            fontFamily: FONTS.mono,
+            fontFamily: fonts.mono,
             fontSize: 11,
-            color: isActive ? COLORS.accent : COLORS.textFaint,
+            color: isActive ? colors.accent : colors.textFaint,
             width: 22,
           }}
         >
@@ -153,7 +154,7 @@ const TrackRow = memo(function TrackRow({
               width: 50,
               height: 50,
               borderRadius: 4,
-              backgroundColor: COLORS.surface,
+              backgroundColor: colors.surface,
             }}
             contentFit="cover"
           />
@@ -162,7 +163,7 @@ const TrackRow = memo(function TrackRow({
               className="absolute inset-0 items-center justify-center"
               style={{ backgroundColor: 'rgba(11,12,11,0.6)', borderRadius: 4 }}
             >
-              <Pause color={COLORS.accent} size={16} fill={COLORS.accent} />
+              <Pause color={colors.accent} size={16} fill={colors.accent} />
             </View>
           )}
         </View>
@@ -170,10 +171,10 @@ const TrackRow = memo(function TrackRow({
         <View className="flex-1 ml-3 min-w-0">
           <Text
             style={{
-              fontFamily: FONTS.sans,
+              fontFamily: fonts.sans,
               fontSize: 17,
               lineHeight: 21,
-              color: COLORS.text,
+              color: colors.text,
             }}
             numberOfLines={1}
           >
@@ -181,10 +182,10 @@ const TrackRow = memo(function TrackRow({
           </Text>
           <Text
             style={{
-              fontFamily: FONTS.mono,
+              fontFamily: fonts.mono,
               fontSize: 11,
               letterSpacing: 0.4,
-              color: COLORS.textDim,
+              color: colors.textDim,
               marginTop: 2,
             }}
             numberOfLines={1}
@@ -195,9 +196,9 @@ const TrackRow = memo(function TrackRow({
 
         <Text
           style={{
-            fontFamily: FONTS.mono,
+            fontFamily: fonts.mono,
             fontSize: 11,
-            color: COLORS.textFaint,
+            color: colors.textFaint,
             marginLeft: 8,
           }}
         >
@@ -214,8 +215,8 @@ const TrackRow = memo(function TrackRow({
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Heart
-              color={isFavorited ? COLORS.secondary : COLORS.textFaint}
-              fill={isFavorited ? COLORS.secondary : 'transparent'}
+              color={isFavorited ? colors.secondary : colors.textFaint}
+              fill={isFavorited ? colors.secondary : 'transparent'}
               size={16}
               strokeWidth={isFavorited ? 2 : 1.8}
             />
@@ -228,7 +229,7 @@ const TrackRow = memo(function TrackRow({
             className="w-8 h-8 items-center justify-center ml-1"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <MoreVertical color={COLORS.textFaint} size={16} />
+            <MoreVertical color={colors.textFaint} size={16} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>

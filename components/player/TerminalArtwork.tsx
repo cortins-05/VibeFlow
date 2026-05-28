@@ -1,21 +1,22 @@
 import { View, Text, Pressable } from 'react-native';
 import { Image } from 'expo-image';
-import { COLORS, FONTS } from '../../constants/theme';
+import { useTheme } from '../../constants/theme';
 
 export default function TerminalArtwork({ uri, size, onPress }: { uri?: string; size: number; onPress?: () => void }) {
+  const { colors, fonts } = useTheme();
   return (
     <Pressable onPress={onPress} style={{ width: size, alignSelf: 'center' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4, marginBottom: 4 }}>
-        <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim }}>┌─ now_playing ──</Text>
-        <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim }}>──┐</Text>
+        <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim }}>┌─ now_playing ──</Text>
+        <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim }}>──┐</Text>
       </View>
       <View
         style={{
           width: size,
           height: size,
           borderWidth: 1,
-          borderColor: COLORS.border,
-          backgroundColor: COLORS.surface,
+          borderColor: colors.border,
+          backgroundColor: colors.surface,
           overflow: 'hidden',
           borderRadius: 4,
         }}

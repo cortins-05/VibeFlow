@@ -1,14 +1,15 @@
 import { Text, Pressable } from 'react-native';
-import { COLORS, FONTS } from '../../constants/theme';
+import { useTheme } from '../../constants/theme';
 
 export default function Tag({ label, active, onPress }: { label: string; active?: boolean; onPress?: () => void }) {
+  const { colors, fonts } = useTheme();
   return (
     <Pressable
       onPress={onPress}
       style={{
         borderWidth: 1,
-        borderColor: active ? COLORS.borderAccent : COLORS.border,
-        backgroundColor: active ? 'rgba(229,255,58,0.08)' : COLORS.surface,
+        borderColor: active ? colors.borderAccent : colors.border,
+        backgroundColor: active ? 'rgba(229,255,58,0.08)' : colors.surface,
         borderRadius: 4,
         paddingHorizontal: 12,
         paddingVertical: 7,
@@ -16,7 +17,7 @@ export default function Tag({ label, active, onPress }: { label: string; active?
         marginBottom: 8,
       }}
     >
-      <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: active ? COLORS.accent : COLORS.text }}>
+      <Text style={{ fontFamily: fonts.mono, fontSize: 12, color: active ? colors.accent : colors.text }}>
         #{label}
       </Text>
     </Pressable>

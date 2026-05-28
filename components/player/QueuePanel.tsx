@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { X, ChevronUp, ChevronDown } from 'lucide-react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
-import { COLORS, FONTS } from '../../constants/theme';
+import { useTheme } from '../../constants/theme';
 import { usePlayerStore } from '../../stores/playerStore';
 
 const { height: SCREEN_H } = Dimensions.get('window');
@@ -16,6 +16,7 @@ function fmt(seconds: number): string {
 }
 
 export default function QueuePanel({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { colors, fonts } = useTheme();
   const { queue, activeTrackIndex, removeFromQueue, clearQueue, moveInQueue } = usePlayerStore();
 
   const translateY = useSharedValue(PANEL_HEIGHT);
@@ -54,28 +55,28 @@ export default function QueuePanel({ visible, onClose }: { visible: boolean; onC
             left: 0,
             right: 0,
             height: PANEL_HEIGHT,
-            backgroundColor: COLORS.surface,
+            backgroundColor: colors.surface,
             borderTopLeftRadius: 6,
             borderTopRightRadius: 6,
             borderWidth: 1,
-            borderColor: COLORS.border,
+            borderColor: colors.border,
             borderBottomWidth: 0,
           },
           panelStyle,
         ]}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: COLORS.border }}>
-          <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.accent, letterSpacing: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+          <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.accent, letterSpacing: 1 }}>
             [ QUEUE ] — {queue.length} tracks
           </Text>
           <View style={{ flexDirection: 'row', gap: 12 }}>
             {queue.length > 0 && (
               <Pressable onPress={clearQueue} hitSlop={8}>
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.error }}>[ clear ]</Text>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.error }}>[ clear ]</Text>
               </Pressable>
             )}
             <Pressable onPress={onClose} hitSlop={8}>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim }}>[ close ]</Text>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim }}>[ close ]</Text>
             </Pressable>
           </View>
         </View>
@@ -83,7 +84,7 @@ export default function QueuePanel({ visible, onClose }: { visible: boolean; onC
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20 }}>
           {queue.length === 0 && (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>// queue empty</Text>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>// queue empty</Text>
             </View>
           )}
           {queue.map((track, i) => (
@@ -95,7 +96,7 @@ export default function QueuePanel({ visible, onClose }: { visible: boolean; onC
                 paddingHorizontal: 16,
                 paddingVertical: 10,
                 borderBottomWidth: 1,
-                borderBottomColor: COLORS.border,
+                borderBottomColor: colors.border,
                 backgroundColor: i === activeTrackIndex ? 'rgba(229,255,58,0.05)' : 'transparent',
               }}
             >
@@ -106,7 +107,7 @@ export default function QueuePanel({ visible, onClose }: { visible: boolean; onC
                   hitSlop={6}
                   style={{ opacity: i === 0 ? 0.2 : 1, paddingVertical: 1 }}
                 >
-                  <ChevronUp color={COLORS.textFaint} size={12} strokeWidth={1.8} />
+                  <ChevronUp color={colors.textFaint} size={12} strokeWidth={1.8} />
                 </Pressable>
                 <Pressable
                   onPress={() => moveInQueue(i, i + 1)}
@@ -114,26 +115,26 @@ export default function QueuePanel({ visible, onClose }: { visible: boolean; onC
                   hitSlop={6}
                   style={{ opacity: i === queue.length - 1 ? 0.2 : 1, paddingVertical: 1 }}
                 >
-                  <ChevronDown color={COLORS.textFaint} size={12} strokeWidth={1.8} />
+                  <ChevronDown color={colors.textFaint} size={12} strokeWidth={1.8} />
                 </Pressable>
               </View>
 
               {i === activeTrackIndex ? (
-                <View style={{ width: 2, height: 28, backgroundColor: COLORS.accent, marginRight: 8, borderRadius: 1 }} />
+                <View style={{ width: 2, height: 28, backgroundColor: colors.accent, marginRight: 8, borderRadius: 1 }} />
               ) : (
                 <View style={{ width: 10 }} />
               )}
 
               <Image
                 source={{ uri: track.artwork }}
-                style={{ width: 36, height: 36, borderRadius: 3, backgroundColor: COLORS.bg }}
+                style={{ width: 36, height: 36, borderRadius: 3, backgroundColor: colors.bg }}
                 contentFit="cover"
               />
               <View style={{ flex: 1, marginLeft: 10, minWidth: 0 }}>
-                <Text style={{ fontFamily: FONTS.sans, fontSize: 14, color: i === activeTrackIndex ? COLORS.accent : COLORS.text }} numberOfLines={1}>
+                <Text style={{ fontFamily: fonts.sans, fontSize: 14, color: i === activeTrackIndex ? colors.accent : colors.text }} numberOfLines={1}>
                   {track.title}
                 </Text>
-                <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim, marginTop: 1 }} numberOfLines={1}>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: colors.textDim, marginTop: 1 }} numberOfLines={1}>
                   {track.artist} · {fmt(track.duration)}
                 </Text>
               </View>
@@ -143,7 +144,7 @@ export default function QueuePanel({ visible, onClose }: { visible: boolean; onC
                 hitSlop={8}
                 style={{ padding: 6 }}
               >
-                <X color={COLORS.textFaint} size={14} />
+                <X color={colors.textFaint} size={14} />
               </Pressable>
             </View>
           ))}

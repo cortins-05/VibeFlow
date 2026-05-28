@@ -1,13 +1,7 @@
 import { Text, Pressable, type ViewStyle } from 'react-native';
-import { COLORS, FONTS, glow } from '../../constants/theme';
+import { useTheme, glow } from '../../constants/theme';
 
 type Variant = 'accent' | 'secondary' | 'ghost' | 'error';
-const C: Record<Variant, string> = {
-  accent: COLORS.accent,
-  secondary: COLORS.secondary,
-  ghost: COLORS.textDim,
-  error: COLORS.error,
-};
 
 export default function ConsoleButton({
   label,
@@ -22,6 +16,13 @@ export default function ConsoleButton({
   filled?: boolean;
   style?: ViewStyle;
 }) {
+  const { colors, fonts } = useTheme();
+  const C: Record<Variant, string> = {
+    accent: colors.accent,
+    secondary: colors.secondary,
+    ghost: colors.textDim,
+    error: colors.error,
+  };
   const c = C[variant];
   return (
     <Pressable
@@ -42,7 +43,7 @@ export default function ConsoleButton({
         style,
       ]}
     >
-      <Text style={{ fontFamily: FONTS.monoMed, fontSize: 12, letterSpacing: 1, color: filled ? COLORS.bg : c }}>
+      <Text style={{ fontFamily: fonts.monoMed, fontSize: 12, letterSpacing: 1, color: filled ? colors.bg : c }}>
         [ {label} ]
       </Text>
     </Pressable>

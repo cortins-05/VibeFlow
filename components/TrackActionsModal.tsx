@@ -5,7 +5,7 @@ import { useLibraryStore } from '../stores/libraryStore';
 import { usePlayerStore } from '../stores/playerStore';
 import { useDownloadStore } from '../stores/downloadStore';
 import type { Track } from '../stores/playerStore';
-import { COLORS, FONTS } from '../constants/theme';
+import { useTheme } from '../constants/theme';
 
 interface Props {
   visible: boolean;
@@ -14,6 +14,7 @@ interface Props {
 }
 
 export default function TrackActionsModal({ visible, track, onClose }: Props) {
+  const { colors, fonts } = useTheme();
   const { playlists, createPlaylist, addTrackToPlaylist } = useLibraryStore();
   const { addToQueue, addToQueueNext } = usePlayerStore();
   const { getLocalPath, isDownloaded } = useDownloadStore();
@@ -56,23 +57,23 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
       <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(11,12,11,0.8)' }}>
         <View
           style={{
-            backgroundColor: COLORS.surface,
+            backgroundColor: colors.surface,
             borderTopLeftRadius: 6,
             borderTopRightRadius: 6,
             paddingTop: 28,
             paddingBottom: 48,
             borderWidth: 1,
-            borderColor: COLORS.border,
+            borderColor: colors.border,
             borderBottomWidth: 0,
             maxHeight: '85%',
           }}
         >
           <View style={{ paddingHorizontal: 20, paddingBottom: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text style={{ flex: 1, fontFamily: FONTS.mono, fontSize: 12, color: COLORS.accent, letterSpacing: 1 }} numberOfLines={1}>
+            <Text style={{ flex: 1, fontFamily: fonts.mono, fontSize: 12, color: colors.accent, letterSpacing: 1 }} numberOfLines={1}>
               [ {t.title} ]
             </Text>
             <Pressable onPress={onClose} hitSlop={12}>
-              <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.textDim }}>[ close ]</Text>
+              <Text style={{ fontFamily: fonts.mono, fontSize: 12, color: colors.textDim }}>[ close ]</Text>
             </Pressable>
           </View>
 
@@ -80,31 +81,31 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
             {!showPlaylists ? (
               <>
                 <ActionOption
-                  icon={<ListMusic color={COLORS.accent} size={16} />}
+                  icon={<ListMusic color={colors.accent} size={16} />}
                   label="add to queue"
-                  color={COLORS.accent}
+                  color={colors.accent}
                   onPress={handleAddToQueue}
                 />
 
                 <ActionOption
-                  icon={<Play color={COLORS.secondary} size={16} />}
+                  icon={<Play color={colors.secondary} size={16} />}
                   label="play next"
-                  color={COLORS.secondary}
+                  color={colors.secondary}
                   onPress={handlePlayNext}
                 />
 
                 <ActionOption
-                  icon={<ListMusic color={COLORS.textDim} size={16} />}
+                  icon={<ListMusic color={colors.textDim} size={16} />}
                   label="add to playlist"
-                  color={COLORS.textDim}
+                  color={colors.textDim}
                   onPress={() => setShowPlaylists(true)}
                 />
 
                 {downloaded && (
                   <ActionOption
-                    icon={<ListMusic color={COLORS.textDim} size={16} />}
+                    icon={<ListMusic color={colors.textDim} size={16} />}
                     label="downloaded"
-                    color={COLORS.secondary}
+                    color={colors.secondary}
                     onPress={onClose}
                   />
                 )}
@@ -112,7 +113,7 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
             ) : (
               <>
                 <Pressable onPress={() => setShowPlaylists(false)} style={{ marginBottom: 16 }}>
-                  <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.textDim }}>{'< back'}</Text>
+                  <Text style={{ fontFamily: fonts.mono, fontSize: 12, color: colors.textDim }}>{'< back'}</Text>
                 </Pressable>
 
                 {!showCreate ? (
@@ -124,7 +125,7 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
                           alignItems: 'center',
                           paddingVertical: 16,
                           borderBottomWidth: 1,
-                          borderBottomColor: COLORS.border,
+                          borderBottomColor: colors.border,
                         }}
                       >
                         <View
@@ -136,12 +137,12 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
                             alignItems: 'center',
                             justifyContent: 'center',
                             borderWidth: 1,
-                            borderColor: COLORS.borderAccent,
+                            borderColor: colors.borderAccent,
                           }}
                         >
-                          <Text style={{ color: COLORS.accent, fontSize: 22 }}>+</Text>
+                          <Text style={{ color: colors.accent, fontSize: 22 }}>+</Text>
                         </View>
-                        <Text style={{ fontFamily: FONTS.mono, fontSize: 13, color: COLORS.accent, marginLeft: 16 }}>
+                        <Text style={{ fontFamily: fonts.mono, fontSize: 13, color: colors.accent, marginLeft: 16 }}>
                           [ new playlist ]
                         </Text>
                       </Pressable>
@@ -155,7 +156,7 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
                           alignItems: 'center',
                           paddingVertical: 16,
                           borderBottomWidth: 1,
-                          borderBottomColor: COLORS.border,
+                          borderBottomColor: colors.border,
                         }}
                       >
                         <View
@@ -163,15 +164,15 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
                             width: 40,
                             height: 40,
                             borderRadius: 4,
-                            backgroundColor: COLORS.bg,
+                            backgroundColor: colors.bg,
                             alignItems: 'center',
                             justifyContent: 'center',
                           }}
                         >
-                          <ListMusic color={COLORS.secondary} size={20} />
+                          <ListMusic color={colors.secondary} size={20} />
                         </View>
                         <Text
-                          style={{ flex: 1, fontFamily: FONTS.sans, fontSize: 16, color: COLORS.text, marginLeft: 16 }}
+                          style={{ flex: 1, fontFamily: fonts.sans, fontSize: 16, color: colors.text, marginLeft: 16 }}
                           numberOfLines={1}
                         >
                           {pl.name}
@@ -182,9 +183,9 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
                     {playlists.length === 0 && (
                       <Text
                         style={{
-                          fontFamily: FONTS.mono,
+                          fontFamily: fonts.mono,
                           fontSize: 11,
-                          color: COLORS.textFaint,
+                          color: colors.textFaint,
                           textAlign: 'center',
                           paddingVertical: 20,
                         }}
@@ -195,40 +196,40 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
                   </>
                 ) : (
                   <View style={{ paddingVertical: 16 }}>
-                    <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.accent, letterSpacing: 1, marginBottom: 12 }}>
+                    <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.accent, letterSpacing: 1, marginBottom: 12 }}>
                       NEW PLAYLIST
                     </Text>
                     <View
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
-                        backgroundColor: COLORS.bg,
+                        backgroundColor: colors.bg,
                         borderRadius: 4,
                         borderWidth: 1,
-                        borderColor: COLORS.borderAccent,
+                        borderColor: colors.borderAccent,
                         paddingHorizontal: 12,
                       }}
                     >
-                      <Text style={{ fontFamily: FONTS.mono, fontSize: 13, color: COLORS.accent, marginRight: 8 }}>{'>'}</Text>
+                      <Text style={{ fontFamily: fonts.mono, fontSize: 13, color: colors.accent, marginRight: 8 }}>{'>'}</Text>
                       <TextInput
                         value={newName}
                         onChangeText={setNewName}
                         placeholder="name..."
-                        placeholderTextColor={COLORS.textFaint}
+                        placeholderTextColor={colors.textFaint}
                         autoFocus
                         onSubmitEditing={handleCreatePlaylist}
                         style={{
                           flex: 1,
-                          fontFamily: FONTS.mono,
+                          fontFamily: fonts.mono,
                           fontSize: 13,
-                          color: COLORS.text,
+                          color: colors.text,
                           paddingVertical: 11,
                         }}
                       />
                     </View>
                     <View style={{ flexDirection: 'row', marginTop: 16 }}>
                       <Pressable onPress={() => setShowCreate(false)} style={{ flex: 1, paddingVertical: 11, alignItems: 'center' }}>
-                        <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.textDim }}>BACK</Text>
+                        <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>BACK</Text>
                       </Pressable>
                       <Pressable
                         onPress={handleCreatePlaylist}
@@ -236,11 +237,11 @@ export default function TrackActionsModal({ visible, track, onClose }: Props) {
                           flex: 1,
                           paddingVertical: 11,
                           borderRadius: 4,
-                          backgroundColor: COLORS.accent,
+                          backgroundColor: colors.accent,
                           alignItems: 'center',
                         }}
                       >
-                        <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.bg }}>CREATE</Text>
+                        <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.bg }}>CREATE</Text>
                       </Pressable>
                     </View>
                   </View>
@@ -265,6 +266,7 @@ function ActionOption({
   color: string;
   onPress: () => void;
 }) {
+  const { colors, fonts } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -273,11 +275,11 @@ function ActionOption({
         alignItems: 'center',
         paddingVertical: 18,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        borderBottomColor: colors.border,
       }}
     >
       {icon}
-      <Text style={{ fontFamily: FONTS.mono, fontSize: 14, color, marginLeft: 16, letterSpacing: 0.5 }}>
+      <Text style={{ fontFamily: fonts.mono, fontSize: 14, color, marginLeft: 16, letterSpacing: 0.5 }}>
         [ {label} ]
       </Text>
     </Pressable>

@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Play, Pause, SkipForward } from 'lucide-react-native';
 import TrackPlayer, { usePlaybackState, useProgress, State } from 'react-native-track-player';
 import { usePlayerStore } from '../stores/playerStore';
-import { COLORS, FONTS, glow } from '../constants/theme';
+import { useTheme, glow } from '../constants/theme';
 
 function fmt(s: number) {
   const m = Math.floor(s / 60);
@@ -16,6 +16,7 @@ function fmt(s: number) {
 }
 
 const MiniPlayer = memo(function MiniPlayer() {
+  const { colors, fonts } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { currentTrack, isPlayerVisible } = usePlayerStore();
@@ -51,36 +52,36 @@ const MiniPlayer = memo(function MiniPlayer() {
             borderRadius: 6,
             overflow: 'hidden',
             borderWidth: 1,
-            borderColor: COLORS.border,
-            backgroundColor: COLORS.surface,
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
           }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10 }}>
             <Text
               style={{
-                fontFamily: FONTS.mono,
+                fontFamily: fonts.mono,
                 fontSize: 14,
-                color: COLORS.accent,
+                color: colors.accent,
                 marginRight: 10,
-                ...glow(COLORS.accent, 4, 0.5),
+                ...glow(colors.accent, 4, 0.5),
               }}
             >
               {isPlaying ? '▶' : '❚❚'}
             </Text>
             <Image
               source={{ uri: currentTrack.artwork }}
-              style={{ width: 36, height: 36, borderRadius: 4, backgroundColor: COLORS.surface }}
+              style={{ width: 36, height: 36, borderRadius: 4, backgroundColor: colors.surface }}
               contentFit="cover"
             />
             <View style={{ flex: 1, minWidth: 0, marginLeft: 10 }}>
               <Text
-                style={{ fontFamily: FONTS.sans, fontSize: 14, lineHeight: 16, color: COLORS.text }}
+                style={{ fontFamily: fonts.sans, fontSize: 14, lineHeight: 16, color: colors.text }}
                 numberOfLines={1}
               >
                 {currentTrack.title}
               </Text>
               <Text
-                style={{ fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 0.4, color: COLORS.textDim, marginTop: 2 }}
+                style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: 0.4, color: colors.textDim, marginTop: 2 }}
                 numberOfLines={1}
               >
                 {currentTrack.artist.toUpperCase()} · {fmt(progress.position)}/{fmt(progress.duration)}
@@ -92,23 +93,23 @@ const MiniPlayer = memo(function MiniPlayer() {
                 style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
               >
                 {isPlaying ? (
-                  <Pause color={COLORS.accent} size={16} fill={COLORS.accent} />
+                  <Pause color={colors.accent} size={16} fill={colors.accent} />
                 ) : (
-                  <Play color={COLORS.accent} size={16} fill={COLORS.accent} />
+                  <Play color={colors.accent} size={16} fill={colors.accent} />
                 )}
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => TrackPlayer.skipToNext()}
                 style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
               >
-                <SkipForward color={COLORS.textDim} size={16} />
+                <SkipForward color={colors.textDim} size={16} />
               </TouchableOpacity>
             </View>
           </View>
           <View
             style={{
               height: 2,
-              backgroundColor: COLORS.border,
+              backgroundColor: colors.border,
               marginHorizontal: 12,
               marginBottom: 6,
               borderRadius: 1,
@@ -119,7 +120,7 @@ const MiniPlayer = memo(function MiniPlayer() {
               style={{
                 height: '100%',
                 width: `${progressRatio * 100}%`,
-                backgroundColor: COLORS.accent,
+                backgroundColor: colors.accent,
               }}
             />
           </View>
