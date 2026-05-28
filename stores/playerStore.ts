@@ -32,6 +32,9 @@ interface PlayerStore {
   playTrack: (track: Track) => Promise<void>;
   playQueue: (tracks: Track[], startIndex?: number) => Promise<void>;
   addToQueue: (track: Track) => Promise<void>;
+  removeFromQueue: (index: number) => Promise<void>;
+  clearQueue: () => Promise<void>;
+  moveInQueue: (fromIndex: number, toIndex: number) => Promise<void>;
 }
 
 function toTrackType(t: StreamSource['type']): TrackType {
@@ -168,5 +171,58 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     } catch (e) {
       console.error('[playerStore] addToQueue failed:', track.title, e);
     }
+  },
+
+  removeFromQueue: async (index) => {
+    const { queue, activeTrackIndex } = get();
+    if (index < 0 || index >= queue.length) return;
+    const newQueue = queue.filter((_, i) => i !== index);
+    const newIndex = index < activeTrackIndex ? activeTrackIndex - 1
+      : index === activeTrackIndex ? Math.min(activeTrackIndex, newQueue.length - 1)
+      : activeTrackIndex;
+    set({ queue: newQueue, activeTrackIndex: newIndex });
+    await TrackPlayer.reset();
+    for (const t of newQueue) {
+      try {
+        const src = await resolveSource(t);
+        await TrackPlayer.add(toRntpTrack(t, src));
+      } catch (e) {
+        console.warn('[playerStore] skipping unresolvable track:', t.title);
+      }
+    }
+    if (newQueue.length > 0) {
+      await TrackPlayer.skip(newIndex);
+    }
+  },
+
+  clearQueue: async () => {
+    set({ queue: [], activeTrackIndex: -1, currentTrack: null, isPlaying: false });
+    await TrackPlayer.reset();
+  },
+
+  moveInQueue: async (fromIndex, toIndex) => {
+    const { queue, activeTrackIndex } = get();
+    if (fromIndex < 0 || fromIndex >= queue.length || toIndex < 0 || toIndex >= queue.length) return;
+    const newQueue = [...queue];
+    const [moved] = newQueue.splice(fromIndex, 1);
+    newQueue.splice(toIndex, 0, moved);
+    let newActive = activeTrackIndex;
+    if (fromIndex === activeTrackIndex) {
+      newActive = toIndex;
+    } else {
+      if (fromIndex < activeTrackIndex && toIndex >= activeTrackIndex) newActive--;
+      else if (fromIndex > activeTrackIndex && toIndex <= activeTrackIndex) newActive++;
+    }
+    set({ queue: newQueue, activeTrackIndex: newActive });
+    await TrackPlayer.reset();
+    for (const t of newQueue) {
+      try {
+        const src = await resolveSource(t);
+        await TrackPlayer.add(toRntpTrack(t, src));
+      } catch (e) {
+        console.warn('[playerStore] skipping unresolvable track:', t.title);
+      }
+    }
+    await TrackPlayer.skip(newActive);
   },
 }));

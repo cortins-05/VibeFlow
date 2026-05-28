@@ -44,19 +44,20 @@ export default function PlayerScreen() {
   async function handleSkipNext() {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const { queue, activeTrackIndex } = usePlayerStore.getState();
-    const nextIdx = activeTrackIndex + 1;
-    if (nextIdx < queue.length) {
-      usePlayerStore.getState().playQueue(queue, nextIdx);
-    }
+    if (queue.length === 0) return;
+    const nextIdx = (activeTrackIndex + 1) % queue.length;
+    usePlayerStore.getState().playQueue(queue, nextIdx);
   }
 
   async function handleSkipPrev() {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const { queue, activeTrackIndex } = usePlayerStore.getState();
+    if (queue.length === 0) return;
     if (progress.position > 3) {
       await TrackPlayer.seekTo(0);
-    } else if (activeTrackIndex > 0) {
-      usePlayerStore.getState().playQueue(queue, activeTrackIndex - 1);
+    } else {
+      const prevIdx = (activeTrackIndex - 1 + queue.length) % queue.length;
+      usePlayerStore.getState().playQueue(queue, prevIdx);
     }
   }
 
