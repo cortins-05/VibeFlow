@@ -1,38 +1,55 @@
-import { View, Text } from 'react-native';
-import { COLORS, FONTS, glow } from '../../constants/theme';
+import { memo } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { Canvas, Rect, LinearGradient, vec } from '@shopify/react-native-skia';
+import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
+import { COLORS, FONTS } from '../../constants/theme';
+import { useAudioSpectrum } from '../../hooks/useAudioSpectrum';
 
-// Placeholder spectrum. Plan 2 replaces internals with real FFT-driven bars.
+const BAR_COUNT = 32;
+const BAR_GAP = 2;
+const PADDING = 8;
+
+type BarProps = {
+  bands: SharedValue<number[]>;
+  index: number;
+  barWidth: number;
+  canvasHeight: number;
+};
+
+function Bar({ bands, index, barWidth, canvasHeight }: BarProps) {
+  const x = PADDING + index * (barWidth + BAR_GAP);
+  const maxH = canvasHeight - PADDING * 2;
+
+  const height = useDerivedValue(() => Math.max(1, (bands.value[index] ?? 0) * maxH));
+  const y = useDerivedValue(() => canvasHeight - PADDING - height.value);
+
+  return (
+    <Rect x={x} y={y} width={barWidth} height={height}>
+      <LinearGradient
+        start={vec(0, canvasHeight)}
+        end={vec(0, 0)}
+        colors={[COLORS.secondary, COLORS.accent]}
+      />
+    </Rect>
+  );
+}
+
+const BarMemo = memo(Bar);
+
 export default function VisualizerView({ size }: { size: number }) {
-  const bars = [0.3, 0.7, 0.45, 0.9, 0.55, 0.8, 0.4, 0.65, 0.5, 0.75, 0.35, 0.85];
+  const { bands } = useAudioSpectrum();
+  const barWidth = (size - PADDING * 2 - BAR_GAP * (BAR_COUNT - 1)) / BAR_COUNT;
+
   return (
     <View style={{ width: size, alignSelf: 'center' }}>
       <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textDim, marginBottom: 6 }}>
-        ┌─ spectrum ── <Text style={{ color: COLORS.secondary }}>[placeholder]</Text> ──┐
+        ┌─ spectrum ── <Text style={{ color: COLORS.secondary }}>[fft]</Text> ──┐
       </Text>
-      <View
-        style={{
-          width: size,
-          height: size,
-          flexDirection: 'row',
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          paddingHorizontal: 8,
-          borderWidth: 1,
-          borderColor: COLORS.border,
-          borderRadius: 4,
-          paddingVertical: 12,
-        }}
-      >
-        {bars.map((h, i) => (
-          <View
-            key={i}
-            style={[
-              { flex: 1, marginHorizontal: 2, height: `${h * 100}%`, backgroundColor: COLORS.accent, borderRadius: 2 },
-              glow(COLORS.accent, 8, 0.4),
-            ]}
-          />
+      <Canvas style={{ width: size, height: size, borderRadius: 4 }}>
+        {Array.from({ length: BAR_COUNT }).map((_, i) => (
+          <BarMemo key={i} bands={bands} index={i} barWidth={barWidth} canvasHeight={size} />
         ))}
-      </View>
+      </Canvas>
       <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.textFaint, marginTop: 4, textAlign: 'center' }}>
         tap → cover
       </Text>
