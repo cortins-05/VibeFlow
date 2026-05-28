@@ -9,6 +9,7 @@ export type EventSubscription = {
 export interface AudioSpectrumNativeModule {
   startListening(audioSessionId: number): Promise<void>;
   stopListening(): Promise<void>;
+  isPermissionGranted(): Promise<boolean>;
   addListener(eventName: 'onSpectrum', listener: (event: SpectrumData) => void): EventSubscription;
   removeListeners(count: number): void;
 }

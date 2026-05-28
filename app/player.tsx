@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, Pressable, Dimensions, StatusBar } from 'react-native';
+import { View, Text, Pressable, Dimensions, StatusBar, Platform, PermissionsAndroid } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronDown, ListMusic } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -86,8 +86,14 @@ export default function PlayerScreen() {
     TrackPlayer.seekTo(ratio * progress.duration);
   }
 
-  function enterVisualizer() {
+  async function enterVisualizer() {
     setShowLyrics(false);
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) return;
+      } catch {}
+    }
     setVisualizerMode((v) => !v);
   }
 

@@ -1,12 +1,18 @@
 package expo.modules.audiosprectrum
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.media.audiofx.Visualizer
+import android.os.Handler
+import android.os.Looper
+import androidx.core.content.ContextCompat
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import kotlin.math.sqrt
 
 class AudioSpectrumModule : Module() {
   private var visualizer: Visualizer? = null
+  private val mainHandler = Handler(Looper.getMainLooper())
 
   override fun definition() = ModuleDefinition {
     Name("AudioSpectrum")
@@ -21,6 +27,13 @@ class AudioSpectrumModule : Module() {
       stopListening()
     }
 
+    Function("isPermissionGranted") {
+      ContextCompat.checkSelfPermission(
+        appContext.reactContext ?: return@Function false,
+        Manifest.permission.RECORD_AUDIO
+      ) == PackageManager.PERMISSION_GRANTED
+    }
+
     OnDestroy {
       stopListening()
     }
@@ -28,6 +41,7 @@ class AudioSpectrumModule : Module() {
 
   private fun startListening(audioSessionId: Int) {
     stopListening()
+    emitZeroBands()
 
     try {
       val v = Visualizer(audioSessionId)
@@ -47,7 +61,9 @@ class AudioSpectrumModule : Module() {
             samplingRate: Int
           ) {
             val magnitudes = computeMagnitudes(fft)
-            sendEvent("onSpectrum", mapOf("bands" to magnitudes.toList()))
+            mainHandler.post {
+              sendEvent("onSpectrum", mapOf("bands" to magnitudes.toList()))
+            }
           }
         },
         Visualizer.getMaxCaptureRate(),
@@ -57,10 +73,8 @@ class AudioSpectrumModule : Module() {
 
       v.enabled = true
       visualizer = v
-    } catch (e: SecurityException) {
-      sendEvent("onSpectrum", mapOf("bands" to List(32) { 0f }))
-    } catch (e: Exception) {
-      sendEvent("onSpectrum", mapOf("bands" to List(32) { 0f }))
+    } catch (_: SecurityException) {
+    } catch (_: Exception) {
     }
   }
 
@@ -70,6 +84,12 @@ class AudioSpectrumModule : Module() {
       it.release()
     }
     visualizer = null
+  }
+
+  private fun emitZeroBands() {
+    mainHandler.post {
+      sendEvent("onSpectrum", mapOf("bands" to List(32) { 0f }))
+    }
   }
 
   private fun computeMagnitudes(fft: ByteArray): FloatArray {

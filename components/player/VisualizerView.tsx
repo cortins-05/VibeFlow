@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Canvas, Rect, LinearGradient, vec } from '@shopify/react-native-skia';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 import { COLORS, FONTS } from '../../constants/theme';
@@ -20,7 +20,7 @@ function Bar({ bands, index, barWidth, canvasHeight }: BarProps) {
   const x = PADDING + index * (barWidth + BAR_GAP);
   const maxH = canvasHeight - PADDING * 2;
 
-  const height = useDerivedValue(() => Math.max(1, (bands.value[index] ?? 0) * maxH));
+  const height = useDerivedValue(() => bands.value[index] ?? 1);
   const y = useDerivedValue(() => canvasHeight - PADDING - height.value);
 
   return (
