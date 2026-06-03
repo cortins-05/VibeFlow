@@ -12,6 +12,10 @@ async function getClient(): Promise<Innertube> {
   return client;
 }
 
+export function resetClient(): void {
+  client = null;
+}
+
 export interface VideoInfo {
   videoId: string;
   title: string;

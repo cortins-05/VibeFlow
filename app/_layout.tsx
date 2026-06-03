@@ -1,6 +1,6 @@
 import '../polyfills';
 import '../global.css';
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { View, Platform, PermissionsAndroid } from 'react-native';
 import { Stack } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -14,6 +14,7 @@ import { initDatabase } from '../services/db';
 import { useLibraryStore } from '../stores/libraryStore';
 import { usePlayerStore } from '../stores/playerStore';
 import { useDownloadStore } from '../stores/downloadStore';
+import MiniPlayer from '../components/MiniPlayer';
 import {
   Fraunces_400Regular,
   Fraunces_700Bold,
@@ -107,16 +108,14 @@ export default function RootLayout() {
     return () => subs.forEach((s) => s.remove());
   }, []);
 
-  const onLayoutRootView = useCallback(async () => {
+  useEffect(() => {
     if (fontsLoaded) {
-      await SplashScreen.hideAsync();
+      SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) return null;
-
   return (
-    <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <StatusBar style="light" />
         <Stack
@@ -135,6 +134,7 @@ export default function RootLayout() {
           />
           <Stack.Screen name="playlist/[id]" />
         </Stack>
+        <MiniPlayer />
       </View>
     </GestureHandlerRootView>
   );

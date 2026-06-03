@@ -5,10 +5,10 @@
     "scheme": "vibeflow",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.jpeg",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/logo.jpeg",
       "resizeMode": "contain",
       "backgroundColor": "#0e0c0a"
     },
@@ -36,6 +36,7 @@
       "typedRoutes": true
     },
     "plugins": [
+      "./plugins/withAndroidAuto",
       "expo-router",
       "expo-dev-client",
       "expo-image",

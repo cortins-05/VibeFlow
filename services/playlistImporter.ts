@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { parseCSV } from './csvParser';
 import { parseJSON } from './jsonParser';
 import { parseTXT } from './txtParser';
-import { searchYouTube, type VideoInfo } from './youtube';
+import { searchYouTube, resetClient, type VideoInfo } from './youtube';
 import type { Track } from '../stores/playerStore';
 
 export interface ParsedTrack {
@@ -117,6 +117,9 @@ export async function searchAndMatch(
 ): Promise<MatchedTrack[]> {
   const results: MatchedTrack[] = [];
   const BATCH_SIZE = 5;
+  const INTER_BATCH_DELAY = 800;
+  const MAX_RETRIES = 3;
+  let consecutiveErrors = 0;
 
   for (let i = 0; i < tracks.length; i += BATCH_SIZE) {
     if (signal?.aborted) {
@@ -126,21 +129,36 @@ export async function searchAndMatch(
     const batch = tracks.slice(i, i + BATCH_SIZE);
     const batchResults = await Promise.all(
       batch.map(async (track) => {
-        const query1 = `${track.artist} - ${track.title}`;
-        const results1 = await searchYouTube(query1);
-        if (results1.length > 0) {
-          const best = results1[0];
-          const conf = computeConfidence(track, best);
-          if (conf >= 70) {
-            return { original: track, match: best, confidence: conf };
-          }
-        }
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+          try {
+            const query1 = `${track.artist} - ${track.title}`;
+            const results1 = await searchYouTube(query1);
+            if (results1.length > 0) {
+              const best = results1[0];
+              const conf = computeConfidence(track, best);
+              if (conf >= 70) {
+                consecutiveErrors = Math.max(0, consecutiveErrors - 1);
+                return { original: track, match: best, confidence: conf };
+              }
+            }
 
-        const results2 = await searchYouTube(track.title);
-        if (results2.length > 0) {
-          const best = results2[0];
-          const conf = computeConfidence(track, best);
-          return { original: track, match: best, confidence: conf };
+            const results2 = await searchYouTube(track.title);
+            if (results2.length > 0) {
+              const best = results2[0];
+              const conf = computeConfidence(track, best);
+              consecutiveErrors = Math.max(0, consecutiveErrors - 1);
+              return { original: track, match: best, confidence: conf };
+            }
+          } catch {
+            consecutiveErrors++;
+          }
+
+          if (consecutiveErrors >= 3) {
+            resetClient();
+            await delay(5000);
+          } else if (attempt < MAX_RETRIES - 1) {
+            await delay(1000 * Math.pow(2, attempt));
+          }
         }
 
         return { original: track, match: null, confidence: 0 };
@@ -149,9 +167,17 @@ export async function searchAndMatch(
     results.push(...batchResults);
 
     onProgress?.(Math.min(i + BATCH_SIZE, tracks.length), tracks.length);
+
+    if (i + BATCH_SIZE < tracks.length) {
+      await delay(INTER_BATCH_DELAY);
+    }
   }
 
   return results;
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function matchedTracksToTracks(matched: MatchedTrack[]): Track[] {

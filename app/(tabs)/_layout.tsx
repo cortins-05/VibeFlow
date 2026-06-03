@@ -3,7 +3,6 @@ import { View, Text, Pressable } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MiniPlayer from '../../components/MiniPlayer';
 import { useTheme, glow } from '../../constants/theme';
 
 const TABS = [
@@ -102,7 +101,6 @@ export default function TabLayout() {
         <Tabs.Screen name="downloads" />
         <Tabs.Screen name="settings" />
       </Tabs>
-      <MiniPlayer />
     </View>
   );
 }

@@ -1,4 +1,5 @@
 import TrackPlayer, {
+  AndroidAudioContentType,
   AppKilledPlaybackBehavior,
   Capability,
   Event,
@@ -10,10 +11,14 @@ export async function setupPlayer() {
     await TrackPlayer.getActiveTrack();
     isSetup = true;
   } catch {
-    await TrackPlayer.setupPlayer();
+    await TrackPlayer.setupPlayer({
+      androidAudioContentType: AndroidAudioContentType.Music,
+      autoHandleInterruptions: true,
+    });
     await TrackPlayer.updateOptions({
       android: {
         appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+        alwaysPauseOnInterruption: true,
       },
       capabilities: [
         Capability.Play,
@@ -41,4 +46,10 @@ export const PlaybackService = async function () {
   TrackPlayer.addEventListener(Event.RemoteSeek, (e) =>
     TrackPlayer.seekTo(e.position)
   );
+
+  TrackPlayer.addEventListener(Event.RemoteDuck, async (event) => {
+    if (event.paused) {
+      await TrackPlayer.pause();
+    }
+  });
 };
