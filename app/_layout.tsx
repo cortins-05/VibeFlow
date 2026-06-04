@@ -2,7 +2,7 @@ import '../polyfills';
 import '../global.css';
 import { useEffect } from 'react';
 import { View, Platform, PermissionsAndroid } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -114,6 +114,9 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
+  const segments = useSegments();
+  const isPlayerOpen = segments[segments.length - 1] === 'player';
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -134,7 +137,7 @@ export default function RootLayout() {
           />
           <Stack.Screen name="playlist/[id]" />
         </Stack>
-        <MiniPlayer />
+        {!isPlayerOpen && <MiniPlayer />}
       </View>
     </GestureHandlerRootView>
   );
