@@ -5,6 +5,9 @@ import { getDownloadUrl } from '../services/youtube';
 import { useDownloadStore } from '../stores/downloadStore';
 import type { Track } from '../stores/playerStore';
 
+// Opus itags YouTube serves for audio-only adaptive formats.
+const OPUS_ITAGS = new Set([249, 250, 251]);
+
 export type DownloadState = 'idle' | 'downloading' | 'pausing' | 'paused' | 'done' | 'error';
 
 export function useTrackDownload(currentTrack: Track | null) {
@@ -15,6 +18,10 @@ export function useTrackDownload(currentTrack: Track | null) {
   const downloadResumableRef = useRef<FileSystem.DownloadResumable | null>(null);
   const downloadResumeDataRef = useRef<string | undefined>(undefined);
   const downloadUrlRef = useRef<string | undefined>(undefined);
+  // The media server 403s if the resumed request does not carry the same client
+  // headers (User-Agent above all) that the URL was issued for.
+  const downloadHeadersRef = useRef<Record<string, string> | undefined>(undefined);
+  const downloadExtRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     setDownloadState(
@@ -24,6 +31,8 @@ export function useTrackDownload(currentTrack: Track | null) {
     downloadResumableRef.current = null;
     downloadResumeDataRef.current = undefined;
     downloadUrlRef.current = undefined;
+    downloadHeadersRef.current = undefined;
+    downloadExtRef.current = undefined;
   }, [currentTrack?.videoId]);
 
   async function handleDownload() {
@@ -40,12 +49,14 @@ export function useTrackDownload(currentTrack: Track | null) {
       }
 
       downloadUrlRef.current = src.url;
+      downloadHeadersRef.current = src.headers;
 
       const dir = `${FileSystem.documentDirectory}audio/`;
       const safeName = currentTrack.title.replace(/[/\\?%*:|"<>]/g, '_');
-      // Use extension from content-type or default to .m4a
-      const ext = src.url.includes('.webm') ? '.webm' : '.m4a';
+      // itag 251/250/249 are Opus in a WebM container; the rest are AAC in MP4.
+      const ext = OPUS_ITAGS.has(src.itag ?? -1) ? '.webm' : '.m4a';
       const destFile = dir + safeName + ext;
+      downloadExtRef.current = ext;
 
       await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
 
@@ -109,7 +120,7 @@ export function useTrackDownload(currentTrack: Track | null) {
     try {
       const dir = `${FileSystem.documentDirectory}audio/`;
       const safeName = currentTrack.title.replace(/[/\\?%*:|"<>]/g, '_');
-      const ext = downloadUrlRef.current?.includes('.webm') ? '.webm' : '.m4a';
+      const ext = downloadExtRef.current ?? '.m4a';
       const destFile = dir + safeName + ext;
 
       const callback: FileSystem.DownloadProgressCallback = (data) => {
@@ -121,7 +132,7 @@ export function useTrackDownload(currentTrack: Track | null) {
       const resumable = FileSystem.createDownloadResumable(
         downloadUrlRef.current!,
         destFile,
-        undefined,
+        downloadHeadersRef.current,
         callback,
         downloadResumeDataRef.current,
       );

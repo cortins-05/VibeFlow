@@ -32,32 +32,69 @@ cp android/app/build/outputs/apk/release/app-release.apk ~/Projects/APKs/
 - `stores/` — Zustand stores: playerStore, libraryStore, downloadStore
 - `services/` — db (SQLite), **youtube.ts** (primary), **youtubeRest.ts** (fallback), trackPlayerService
 
-## YouTube Services — 3-Layer Fallback Architecture
+## YouTube Services — Verified Single-Path Resolution
 
-### Layer 1: `youtube.ts` (Primary — youtubei.js library)
-- Uses `Innertube.create()` + `yt.getBasicInfo(videoId, { client })` 
-- Client cascade: ANDROID_VR → TV_EMBEDDED → YTMUSIC_ANDROID → ...
-- Each client has matching headers in `CLIENT_HEADERS` (User-Agent, X-YouTube-Client-Name, X-YouTube-Client-Version)
-- `tryResolve()` prefers `best.url` (pre-deciphered) over `best.decipher()` — NO JS evaluator in RN
+**Sept 1 2026 rewrite.** In mid-August 2026 YouTube began requiring a GVS
+Proof-of-Origin token for every ANDROID_VR format except itag 18. ANDROID_VR
+had been the app's primary client, so playback and downloads both broke.
 
-### Layer 2: `youtubeRest.ts` (Fallback — direct REST API)
-- Zero dependency on youtubei.js — pure `fetch` to InnerTube API
-- 4 client configs: ANDROID_VR 1.65.10 + 1.62.27 × 2 API keys (primary + backup)
-- `AbortController` timeout: 15s per attempt
-- Returns pre-deciphered URLs (ANDROID_VR only — the only client that does this)
-- Same Opus 96kbps selection logic
+The failure is deceptive: the InnerTube *player* response still returns
+`playabilityStatus: "OK"` with well-formed URLs. Only the media server rejects
+them, with 403 on every byte range. Any resolver that trusts the player response
+hands ExoPlayer a dead URL and fails silently — which is exactly what happened.
 
-### Layer 3: Backup API Key
-- If primary key fails, tries same clients with `AIzaSyB-63vPrJDKp1nR7Ho9QFnB39E2Kj6Y6QU`
-- Combined success rate from terminal tests: ~80% for popular content
-- On-device success rate expected higher (mobile IP, real device UA)
+### `youtubeSession.ts` — visitor identity
+- Scrapes `visitorData` once from `https://www.youtube.com/sw.js_data`, caches it.
+- Without it most videos come back `LOGIN_REQUIRED` ("Sign in to confirm you're
+  not a bot"). Every player request must carry it, in both the context and the
+  `X-Goog-Visitor-Id` header.
+
+### `youtubeRest.ts` — the only media resolution path
+- Pure `fetch` against InnerTube. Client order: **IOS → IOS 19.45 → IOS_MUSIC →
+  IOS (backup key) → ANDROID_VR**.
+- `verifySource()` is the important part: before returning any source it fetches
+  the *start* of the stream **and a range at 95%**. The tail probe is what
+  catches a PO-token-capped client, which serves the first ~1 MB and then 403s —
+  playback that dies mid-song. A source that fails verification is skipped and
+  the cascade moves on, so the app self-heals when YouTube breaks the next client.
+- Returns `contentLength`, `itag` and `client` alongside the URL.
+- ANDROID_VR is kept last only because it costs nothing and may be un-broken later.
+
+### `youtube.ts` — search and metadata only
+- youtubei.js is still used for `searchYouTube`, `getTrending`, `getVideoInfo`;
+  those endpoints need no PO token.
+- `getStreamSource` / `getDownloadUrl` delegate straight to `youtubeRest.ts`.
+  There is deliberately no second cascade — the old duplicate one was the thing
+  returning unverified ANDROID_VR URLs.
 
 ### Key YouTube Rules
-- **NO JS evaluator** in RN — cannot decipher URLs
-- Must use ANDROID_VR (client 28) — only one returning pre-deciphered URLs
-- **Use `getBasicInfo` NEVER `getInfo`** — getInfo crashes on ANDROID_VR response format
-- Headers MUST match the issuing client or YouTube returns 403 on stream fetch
-- Progressive formats (audio+video) preferred for downloads; adaptive audio-only for streaming
+- **NO JS evaluator** in RN — formats with only `signatureCipher` are unusable;
+  the resolver skips anything without a direct `url`.
+- Headers MUST match the issuing client or the media server returns 403. This
+  applies to *resumed* downloads too — `useTrackDownload` stores the headers and
+  replays them.
+- **Adaptive audio-only, never progressive** for downloads. itag 18 carries video
+  we throw away, and it is the one format ANDROID_VR still serves, which made it
+  a tempting trap.
+- `playabilityStatus: OK` proves nothing. Only bytes from the media server do.
+
+### Diagnosing a future breakage
+```sh
+npm run diagnose            # or: node scripts/diagnose-youtube.mjs <videoId>
+```
+Reports each client as WORKING / RANGE-CAPPED / MEDIA 403 / REFUSED, and
+distinguishes a broken client (clients fail differently) from an IP rate limit
+(all clients fail identically — wait and re-run).
+
+### Tests
+- `npm run test:unit` — network-free; format selection and container sniffing.
+- `npm run test:network` — real InnerTube + media-server requests. Asserts that a
+  resolved URL serves bytes at the start, mid-song, and at 95%, accepts a 1 MiB
+  read, accepts an unranged GET (what `expo-file-system` sends), and transfers a
+  complete file. Resolves each video once and shares it; re-resolving per
+  assertion trips YouTube's bot detection.
+- Network tests failing while unit tests pass usually means this IP is
+  rate-limited, not that the code regressed. Run `npm run diagnose` to confirm.
 
 ## Key Patterns
 - **TrackRow**: memo-ized, accepts `onSwipeRight` (add to queue) and `onSwipeLeft` (remove from playlist). When either is set, wraps content in `Swipeable` from react-native-gesture-handler. Swipe right reveals accent "add to queue" button, swipe left reveals red "remove" button.
@@ -95,3 +132,21 @@ cp android/app/build/outputs/apk/release/app-release.apk ~/Projects/APKs/
 - Prefers direct approach: "no me hagas pensar", just implement
 - Release APK build → ADB install → copy to `~/Projects/APKs/`
 - User runs `npx expo prebuild --no-install` before builds sometimes
+
+## Recent Changes (Sept 1 2026)
+1. **Fixed: nothing streamed or downloaded.** ANDROID_VR became GVS-PO-token-gated
+   in mid-Aug 2026; its URLs resolve with `playabilityStatus: OK` but 403 on every
+   byte range. Switched media resolution to the IOS client.
+2. `services/youtubeSession.ts` — cached `visitorData`, fixes `LOGIN_REQUIRED`
+   ("Sign in to confirm you're not a bot") on most videos.
+3. `services/youtubeRest.ts` rewritten: IOS-first cascade, `verifySource()` probes
+   start **and** 95% before returning, exposes `contentLength`/`itag`/`client`.
+   Only IOS 20.x client versions are accepted — 19.x returns HTTP 400.
+4. `services/youtube.ts` reduced to search/metadata; media resolution delegates to
+   the REST path so there is a single verified route.
+5. `hooks/useTrackDownload.ts` — resume now replays the client headers (it passed
+   `undefined`, guaranteeing a 403), and the file extension follows the itag
+   instead of a substring match on the URL.
+6. Test suite (`vitest`): `tests/formatSelection.test.ts` (unit),
+   `tests/streaming.test.ts` + `tests/download.test.ts` (real network contract).
+7. `scripts/diagnose-youtube.mjs` — per-client WORKING / RANGE-CAPPED verdicts.
